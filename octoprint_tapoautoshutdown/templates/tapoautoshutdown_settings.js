@@ -1,0 +1,38 @@
+<div class="control-group">
+    <label class="control-label">Tapo P110 IP address</label>
+    <div class="controls">
+        <input type="text"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.ip">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Tapo username</label>
+    <div class="controls">
+        <input type="text"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.username">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Tapo password</label>
+    <div class="controls">
+        <input type="password"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.password">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Shutdown delay (seconds)</label>
+    <div class="controls">
+        <input type="number"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.delay">
+        	<p class="help-block">
+            	Time to wait after a completed print before switching the P110 off.
+        	</p>
+    </div>
+</div>
