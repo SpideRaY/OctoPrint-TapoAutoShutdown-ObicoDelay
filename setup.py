@@ -12,6 +12,12 @@ setuptools.setup(
     author="SpideRaY",
     url="https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown",
     packages=setuptools.find_packages(),
+    package_data={
+        "octoprint_tapoautoshutdown": [
+            "templates/*.jinja2",
+        ],
+    },
+    include_package_data=True,
     install_requires=[
         "tapo>=0.9.0",
     ],
