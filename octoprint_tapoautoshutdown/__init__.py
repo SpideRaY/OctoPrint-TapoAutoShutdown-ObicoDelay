@@ -1,6 +1,7 @@
 import asyncio
 import threading
 import time
+
 import octoprint.plugin
 from tapo import ApiClient
 
@@ -16,19 +17,22 @@ class TapoAutoShutdownPlugin(
 
     def on_event(self, event, payload):
         if event == "PrintDone":
-            self._logger.info("Print completed - starting shutdown timer")
-    threading.Thread(
-	target=self._delayed_shutdown,
-	daemon=True,
-    ).start()
+            self._logger.info(
+                "Print completed - starting shutdown timer"
+            )
+
+            threading.Thread(
+                target=self._delayed_shutdown,
+                daemon=True,
+            ).start()
 
     def _delayed_shutdown(self):
-        delay = int(self.settings.get(["delay"]))
+        delay = int(self._settings.get(["delay"]))
 
         self._logger.info(
-            "Waiting %s seconds before switching off the Tapo P100",
+            "Waiting %s seconds before switching off the Tapo P110",
             delay,
-	)
+        )
 
         time.sleep(delay)
 
@@ -45,11 +49,14 @@ class TapoAutoShutdownPlugin(
 
             await plug.off()
 
-            self._logger.info("Tapo P110 switched OFF successfully")
+            self._logger.info(
+                "Tapo P110 switched OFF successfully"
+            )
 
         except Exception as e:
             self._logger.error(
-                "Failed to switch off Tapo P110: %s", e
+                "Failed to switch off Tapo P110: %s",
+                e,
             )
 
     def get_settings_defaults(self):
@@ -57,10 +64,10 @@ class TapoAutoShutdownPlugin(
             "username": "",
             "password": "",
             "ip": "",
+            "delay": 60,
         }
 
 
 __plugin_name__ = "Tapo Auto Shutdown"
 __plugin_pythoncompat__ = ">=3.9,<3.14"
 __plugin_implementation__ = TapoAutoShutdownPlugin()
-
