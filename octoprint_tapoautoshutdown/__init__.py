@@ -67,6 +67,9 @@ class TapoAutoShutdownPlugin(
             "delay": 60,
         }
 
+    def get_settings_version(self):
+        return 1
+
 
 __plugin_name__ = "Tapo Auto Shutdown"
 __plugin_pythoncompat__ = ">=3.9,<3.14"
