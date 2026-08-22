@@ -10,6 +10,7 @@ class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
     octoprint.plugin.EventHandlerPlugin,
     octoprint.plugin.SettingsPlugin,
+    octoprint.plugin.TemplatePlugin,
 ):
 
     def on_after_startup(self):
