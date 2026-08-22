@@ -59,6 +59,15 @@ class TapoAutoShutdownPlugin(
                 e,
             )
 
+    def get_template_configs(self):
+        return [
+            {
+                "type": "settings",
+                "name": "Tapo Auto Shutdown",
+                "template": "tapoautoshutdown_settings.jinja2",
+            }
+        ]
+
     def get_settings_defaults(self):
         return {
             "username": "",
