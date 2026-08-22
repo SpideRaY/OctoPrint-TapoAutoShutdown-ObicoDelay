@@ -64,6 +64,7 @@ class TapoAutoShutdownPlugin(
             {
                 "type": "settings",
                 "name": "Tapo Auto Shutdown",
+                "template": "tapoautoshutdown_settings.jinja2",
                 "custom_bindings": False,
             }
         ]
