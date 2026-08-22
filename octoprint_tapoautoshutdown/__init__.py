@@ -59,6 +59,15 @@ class TapoAutoShutdownPlugin(
                 e,
             )
 
+    def get_template_configs(self):
+        return [
+            {
+                "type": "settings",
+                "name": "Tapo Auto Shutdown",
+                "custom_bindings": False,
+            }
+        ]
+  
     def get_settings_defaults(self):
         return {
             "username": "",
