@@ -13,26 +13,141 @@ class TapoAutoShutdownPlugin(
     octoprint.plugin.TemplatePlugin,
 ):
 
+    def __init__(self):
+        self._obico_timer = None
+        self._obico_timer_lock = threading.Lock()
+
     def on_after_startup(self):
         self._logger.info("Tapo Auto Shutdown started")
 
+    def on_shutdown(self):
+        self._cancel_obico_timer()
+
     def on_event(self, event, payload):
-        if event == "PrintDone":
-            self._logger.info(
-                "Print completed - starting shutdown timer"
+
+        # Start Obico countdown when a print starts
+        if event == "PrintStarted":
+            self._start_obico_timer()
+
+        # Cancel the Obico countdown if the print ends
+        elif event in (
+            "PrintDone",
+            "PrintCancelled",
+            "PrintFailed",
+        ):
+            self._cancel_obico_timer()
+
+            # Existing Tapo shutdown behaviour
+            if event == "PrintDone":
+                self._logger.info(
+                    "Print completed - starting shutdown timer"
+                )
+
+                threading.Thread(
+                    target=self._delayed_shutdown,
+                    daemon=True,
+                ).start()
+
+    def _start_obico_timer(self):
+        self._cancel_obico_timer()
+
+        try:
+            delay_minutes = int(
+                self._settings.get(["obico_monitor_delay"])
+            )
+        except (TypeError, ValueError):
+            delay_minutes = 60
+
+        self._logger.info(
+            "Obico AI monitoring timer started - %s minutes",
+            delay_minutes,
+        )
+
+        self._obico_timer = threading.Timer(
+            delay_minutes * 60,
+            self._enable_obico_if_printing,
+        )
+
+        self._obico_timer.daemon = True
+        self._obico_timer.start()
+
+    def _cancel_obico_timer(self):
+        with self._obico_timer_lock:
+            if self._obico_timer is not None:
+                self._obico_timer.cancel()
+                self._obico_timer = None
+
+    def _enable_obico_if_printing(self):
+
+        with self._obico_timer_lock:
+            self._obico_timer = None
+
+        # Check that a print is actually still running
+        try:
+            if not self._printer.is_printing():
+                self._logger.info(
+                    "Obico timer expired but no print is active - "
+                    "AI monitoring not enabled"
+                )
+                return
+
+        except Exception as e:
+            self._logger.error(
+                "Could not determine printer state: %s",
+                e,
+            )
+            return
+
+        self._logger.info(
+            "Obico timer expired - enabling AI monitoring"
+        )
+
+        self._enable_obico_monitoring()
+
+    def _enable_obico_monitoring(self):
+        """
+        Enable Obico AI monitoring for the linked printer.
+
+        The exact Obico API call will be added once the
+        authenticated endpoint construction is verified.
+        """
+
+        try:
+            obico = self._plugin_manager.get_plugin(
+                "obico",
+                False,
             )
 
-            threading.Thread(
-                target=self._delayed_shutdown,
-                daemon=True,
-            ).start()
+            if obico is None:
+                self._logger.warning(
+                    "Obico plugin is not installed or enabled - "
+                    "AI monitoring cannot be started"
+                )
+                return
+
+            self._logger.info(
+                "Obico plugin detected - ready to enable AI monitoring"
+            )
+
+            # The verified Obico PATCH call will go here.
+
+        except Exception as e:
+            self._logger.error(
+                "Failed to enable Obico AI monitoring: %s",
+                e,
+            )
 
     def _delayed_shutdown(self):
-        delay_minutes = int(
-            self._settings.get(["tapo_shutdown_delay"])
-        )
+
+        try:
+            delay_minutes = int(
+                self._settings.get(["tapo_shutdown_delay"])
+            )
+        except (TypeError, ValueError):
+            delay_minutes = 5
+
         delay_seconds = delay_minutes * 60
-        
+
         self._logger.info(
             "Waiting %s minutes before switching off the Tapo P110",
             delay_minutes,
@@ -43,6 +158,7 @@ class TapoAutoShutdownPlugin(
         asyncio.run(self._switch_off())
 
     async def _switch_off(self):
+
         username = self._settings.get(["username"])
         password = self._settings.get(["password"])
         ip = self._settings.get(["ip"])
@@ -72,7 +188,7 @@ class TapoAutoShutdownPlugin(
                 "custom_bindings": False,
             }
         ]
-  
+
     def get_settings_defaults(self):
         return {
             "username": "",
