@@ -75,7 +75,8 @@ class TapoAutoShutdownPlugin(
             "username": "",
             "password": "",
             "ip": "",
-            "delay": 60,
+            "tapo_shutdown_delay": 5,
+            "obico_monitor_delay": 30,
         }
 
     def get_settings_version(self):
