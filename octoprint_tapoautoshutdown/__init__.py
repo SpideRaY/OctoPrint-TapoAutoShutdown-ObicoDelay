@@ -28,14 +28,17 @@ class TapoAutoShutdownPlugin(
             ).start()
 
     def _delayed_shutdown(self):
-        delay = int(self._settings.get(["delay"]))
-
+        delay_minutes = int(
+            self._settings.get(["tapo_shutdown_delay"])
+        )
+        delay_seconds = delay_minutes * 60
+        
         self._logger.info(
-            "Waiting %s seconds before switching off the Tapo P110",
-            delay,
+            "Waiting %s minutes before switching off the Tapo P110",
+            delay_minutes,
         )
 
-        time.sleep(delay)
+        time.sleep(delay_seconds)
 
         asyncio.run(self._switch_off())
 
