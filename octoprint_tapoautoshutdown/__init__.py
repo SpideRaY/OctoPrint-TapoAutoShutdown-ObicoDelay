@@ -20,6 +20,13 @@ class TapoAutoShutdownPlugin(
     def on_after_startup(self):
         self._logger.info("Tapo Auto Shutdown started")
 
+        obico = self._plugin_manager.plugins.get("obico")
+
+        if obico is not None:
+            self._logger.info("Obico plugin detected - API connection available")
+        else:
+            self._logger.warning("Obico plugin not detected")
+
     def on_shutdown(self):
         self._cancel_obico_timer()
 
