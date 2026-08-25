@@ -36,3 +36,18 @@
         	</p>
     </div>
 </div>
+
+<div class="control-group">
+    <label class="control-label">Obico AI delay (minutes)</label>
+    <div class="controls">
+        <input type="number"
+            class="input-block-level"
+            min="0"
+            data-bind="value: settings.plugins.tapoautoshutdown.obico_monitor_delay">
+        <p class="help-block">
+            Time to wait after a print starts before enabling Obico AI failure detection.
+            Set to 0 to enable AI immediately.
+        </p>
+    </div>
+</div>
+
