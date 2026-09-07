@@ -53,6 +53,7 @@ class TapoAutoShutdownPlugin(
 
         # Start Obico countdown when a print starts
         if event == "PrintStarted":
+            self._disable_obico_monitoring()
             self._start_obico_timer()
 
         # Cancel the Obico countdown if the print ends
@@ -62,6 +63,7 @@ class TapoAutoShutdownPlugin(
             "PrintFailed",
         ):
             self._cancel_obico_timer()
+            self._disable_obico_monitoring()
 
             # Existing Tapo shutdown behaviour
             if event == "PrintDone":
@@ -177,6 +179,30 @@ class TapoAutoShutdownPlugin(
             self._logger.error(
                 "Failed to enable Obico AI monitoring: %s",
                 e,
+            )
+
+    def _disable_obico_monitoring(self):
+        try:
+            obico = self._plugin_manager.get_plugin("obico", False)
+            if obico is None:
+                return
+
+            response = obico.server_request(
+                "PATCH",
+                "/api/v1/octo/printer/",
+                obico,
+                headers=obico.auth_headers(),
+                json={"watching_enabled": False},
+            )
+
+            if response is not None and response.ok:
+                self._logger.info("Obico AI monitoring disabled successfully")
+            else:
+                self._logger.error("Failed to disable Obico AI monitoring")
+
+        except Exception as e:
+            self._logger.error(
+                "Failed to disable Obico AI monitoring: %s", e
             )
 
     def _delayed_shutdown(self):
