@@ -155,7 +155,23 @@ class TapoAutoShutdownPlugin(
                 "Obico plugin detected - ready to enable AI monitoring"
             )
 
-            # The verified Obico PATCH call will go here.
+            response = obico.server_request(
+                'PATCH',
+                '/api/v1/octo/printer/',
+                obico,
+                headers=obico.auth_headers(),
+                json={'watching_enabled': True},
+            )
+
+            if response is not None and response.ok:
+                self._logger.info(
+                    "Obico AI monitoring enabled successfully"
+                )
+            else:
+                self._logger.error(
+                    "Failed to enable Obico AI monitoring: HTTP %s",
+                    response.status_code if response is not None else "no response",
+                )
 
         except Exception as e:
             self._logger.error(
