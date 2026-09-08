@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="OctoPrint-TapoAutoShutdown",
-    version="0.1.0",
-    description="Automatically switch off a Tapo P110 after a completed print.",
+    version="0.2.0",
+    description="Automatically control a Tapo P110 and manage Obico AI monitoring around your prints.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="SpideRaY",
@@ -21,7 +21,7 @@ setuptools.setup(
     install_requires=[
         "tapo>=0.9.0",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.9,<3.14",
     entry_points={
         "octoprint.plugin": [
             "tapoautoshutdown = octoprint_tapoautoshutdown",
