@@ -10,7 +10,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="SpideRaY",
-    url="https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown",
+    url="https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay",
     packages=setuptools.find_packages(),
     package_data={
         "octoprint_tapoautoshutdown": [
