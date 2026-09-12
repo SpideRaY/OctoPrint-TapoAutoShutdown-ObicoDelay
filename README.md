@@ -33,4 +33,4 @@ Development
 This is an independently developed OctoPrint plugin by SpideRaY.
 
 GitHub:
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown
+https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
