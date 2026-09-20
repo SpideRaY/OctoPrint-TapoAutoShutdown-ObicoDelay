@@ -274,8 +274,29 @@ class TapoAutoShutdownPlugin(
 
     def get_settings_version(self):
         return 1
-
-
+        
+    def get_update_information(self):
+        return {
+            "tapoautoshutdown": {
+                "displayName": "Tapo Auto Shutdown",
+                "displayVersion": __plugin_version__,
+                "type": "github_release",
+                "user": "SpideRaY",
+                "repo": "OctoPrint-TapoAutoShutdown-ObicoDelay",
+                "current": __plugin_version__,
+                "pip": "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/{target_version}.zip",
+            }
+        }
+        
 __plugin_name__ = "Tapo Auto Shutdown"
+__plugin_version__ = "0.2.0"
 __plugin_pythoncompat__ = ">=3.9,<3.14"
-__plugin_implementation__ = TapoAutoShutdownPlugin()
+
+def __plugin_load__():
+    global __plugin_implementation__
+    __plugin_implementation__ = TapoAutoShutdownPlugin()
+
+    global __plugin_hooks__
+    __plugin_hooks__ = {
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
+    }
