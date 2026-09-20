@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "OctoPrint-TapoAutoShutdown"
+version = "0.2.0"
+description = "Automatically control a Tapo P110 and manage Obico AI monitoring around your prints."
+readme = {file = "README.md", content-type = "text/markdown"}
+authors = [
+    {name = "SpideRaY"}
+]
+requires-python = ">=3.9,<3.14"
+dependencies = [
+    "tapo>=0.9.0",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = [
+    "octoprint_tapoautoshutdown",
+    "octoprint_tapoautoshutdown.*"
+]
+
+[tool.setuptools.package-data]
+octoprint_tapoautoshutdown = [
+    "templates/*.jinja2",
+]
+
+[project.entry-points."octoprint.plugin"]
+tapoautoshutdown = "octoprint_tapoautoshutdown"
+
+[project.urls]
+Homepage = "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay"
