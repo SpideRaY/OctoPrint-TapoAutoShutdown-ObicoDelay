@@ -1,10 +1,13 @@
 import asyncio
 import threading
 import time
+from importlib.metadata import version
 
 import octoprint.plugin
 from tapo import ApiClient
 import octoprint_obico
+
+__plugin_version__ = version("OctoPrint-TapoAutoShutdown")
 
 class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
@@ -289,8 +292,7 @@ class TapoAutoShutdownPlugin(
         }
         
 __plugin_name__ = "Tapo Auto Shutdown"
-__plugin_version__ = "0.2.0"
-__plugin_pythoncompat__ = ">=3.9,<3.14"
+__plugin_pythoncompat__ = ">=3.11,<4"
 
 def __plugin_load__():
     global __plugin_implementation__
