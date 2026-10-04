@@ -74,19 +74,19 @@ class TapoAutoShutdownPlugin(
             self._cancel_obico_timer()
             self._disable_obico_monitoring()
 
-        if (
-           self._settings.get(["octopi_shutdown_enabled"])
-           and self._settings.get(["octopi_tapo_enabled"])
-           ):
+            if (
+                self._settings.get(["octopi_shutdown_enabled"])
+                and self._settings.get(["octopi_tapo_enabled"])
+            ):
                 
-           self._logger.info(
-               "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
-            )
+                self._logger.info(
+                    "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
+                )
 
-            threading.Thread(
-                target=self._octopi_shutdown_sequence,
-                daemon=True,
-            ).start()
+                threading.Thread(
+                    target=self._octopi_shutdown_sequence,
+                    daemon=True,
+                ).start()
         else:
             
             # Existing Tapo shutdown behaviour
