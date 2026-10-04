@@ -28,7 +28,7 @@ The plugin provides settings for:
 Requirements
 
 * OctoPrint installed on suitable Rasperry Pi 4
-* Tapo P110 smart plug
+* Tapo P110 smart plug v1.0 - firmware 1.4.8 b260804 or later
 * Tapo Python package 0.9.0 or newer
 * Obico plugin for Obico AI monitoring features, with paid AI hours.
 
