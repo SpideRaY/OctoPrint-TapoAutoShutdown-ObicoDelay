@@ -59,6 +59,12 @@ class TapoAutoShutdownPlugin(
             self._disable_obico_monitoring()
             self._start_obico_timer()
 
+        # Handle completed timelapse rendering        
+        elif event == "MovieDone":
+            self._logger.info(
+            "Timelapse rendering completed successfully"
+            )
+        
         # Cancel the Obico countdown if the print ends
         elif event in (
             "PrintDone",
