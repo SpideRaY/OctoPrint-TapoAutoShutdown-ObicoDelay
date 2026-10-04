@@ -8,7 +8,6 @@ Features
 * Configurable Printer Tapo shutdown delay in minutes.
 * Automatically switches the OctoPi Tapo P110 off after a completed print, unless it fails on Obico.
 * Preset OctoPi Tapo shutdown delay in minutes, after completed video rendering is saved.
-* 
 * Automatically disables Obico AI when a print starts.
 * Configurable Obico AI monitoring delay.
 * Enables Obico AI after the selected delay if the print is still running.
