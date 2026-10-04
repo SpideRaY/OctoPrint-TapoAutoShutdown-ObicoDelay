@@ -20,9 +20,8 @@ Settings
 
 The plugin provides settings for:
 
-* Tapo P110 IP address
-* Tapo username
-* Tapo password
+* Two unique Tapo P110 IP addresses
+* Tapo username, Tapo password, usually the same from the Tapo App
 * Tapo shutdown delay
 * Obico AI monitoring delay
 
