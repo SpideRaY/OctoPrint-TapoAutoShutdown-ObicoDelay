@@ -60,12 +60,26 @@ class TapoAutoShutdownPlugin(
             self._disable_obico_monitoring()
             self._start_obico_timer()
 
-        # Handle completed timelapse rendering        
+        # Handle completed timelapse rendering
         elif event == "MovieDone":
             self._logger.info(
-            "Timelapse rendering completed successfully"
+                "Timelapse rendering completed successfully"
             )
+
+            if (
+            self._settings.get(["octopi_shutdown_enabled"])
+            and self._settings.get(["octopi_tapo_enabled"])
+        ):
+            self._logger.info(
+                "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
+            )
+
+            threading.Thread(
+                target=self._octopi_shutdown_sequence,
+                daemon=True,
+            ).start()
         
+            
         # Cancel the Obico countdown if the print ends
         elif event in (
             "PrintDone",
@@ -239,6 +253,11 @@ class TapoAutoShutdownPlugin(
                 "Failed to arm OctoPi Tapo shutdown timer: %s",
                 e,
             )
+
+    # Run the OctoPi shutdown sequence in the background
+    def _octopi_shutdown_sequence(self):
+        asyncio.run(self._arm_octopi_tapo_timer())
+        self._shutdown_octopi()
     
     # Request a clean shutdown of OctoPi
     def _shutdown_octopi(self):
