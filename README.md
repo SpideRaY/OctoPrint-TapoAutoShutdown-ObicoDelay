@@ -28,9 +28,19 @@ The plugin provides settings for:
 Requirements
 
 * OctoPrint installed on suitable Rasperry Pi 4
-* Tapo P110 smart plug v1.0 - firmware 1.4.8 b260804 or later
+* Tapo P110 smart plug v1.0 
 * Tapo Python package 0.9.0 or newer
 * Obico plugin for Obico AI monitoring features, with paid AI hours.
+
+Compatibility
+
+* This plugin is designed for the TP-Link Tapo P110 smart plug.
+* The OctoPi shutdown functionality has been developed and tested with:
+* Tapo P110 (UK)
+* Firmware 1.4.8 Build 260804
+* Python `tapo` package 0.9.0 or newer
+
+Firmware versions may vary by hardware revision and region. Check the Tapo app for the firmware version installed on your device.
 
 Installation
 
