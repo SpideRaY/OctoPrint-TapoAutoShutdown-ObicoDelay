@@ -20,6 +20,7 @@ class TapoAutoShutdownPlugin(
     def __init__(self):
         self._obico_timer = None
         self._obico_timer_lock = threading.Lock()
+        self._successful_print = False
 
     def on_after_startup(self):
         self._logger.info("Tapo Auto Shutdown started")
@@ -57,6 +58,7 @@ class TapoAutoShutdownPlugin(
 
         # Start Obico countdown when a print starts
         if event == "PrintStarted":
+            self._successful_print = False
             self._disable_obico_monitoring()
             self._start_obico_timer()
 
@@ -67,8 +69,10 @@ class TapoAutoShutdownPlugin(
             )
 
             if (
-            self._settings.get(["octopi_shutdown_enabled"])
+            self._successful_print
+            and self._settings.get(["octopi_shutdown_enabled"])
             and self._settings.get(["octopi_tapo_enabled"])
+                
         ):
             self._logger.info(
                 "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
@@ -79,26 +83,31 @@ class TapoAutoShutdownPlugin(
                 daemon=True,
             ).start()
         
-            
-        # Cancel the Obico countdown if the print ends
-        elif event in (
-            "PrintDone",
-            "PrintCancelled",
-            "PrintFailed",
-        ):
+        # Handle a successfully completed print
+        elif event == "PrintDone":
+            self._successful_print = True
             self._cancel_obico_timer()
             self._disable_obico_monitoring()
 
             # Existing Tapo shutdown behaviour
-            if event == "PrintDone":
-                self._logger.info(
-                    "Print completed - starting shutdown timer"
-                )
+            self._logger.info(
+                "Print completed - starting shutdown timer"
+            )
 
-                threading.Thread(
-                    target=self._delayed_shutdown,
-                    daemon=True,
-                ).start()
+            threading.Thread(
+                target=self._delayed_shutdown,
+                daemon=True,
+            ).start()
+
+        # Cancel the Obico countdown if the print is cancelled or fails
+        elif event in (
+            "PrintCancelled",
+            "PrintFailed",
+        ):
+            self._successful_print = False
+            self._cancel_obico_timer()
+            self._disable_obico_monitoring()          
+
 
     def _start_obico_timer(self):
         self._cancel_obico_timer()
@@ -248,16 +257,28 @@ class TapoAutoShutdownPlugin(
                 "OctoPi Tapo P110 shutdown timer armed for 1 minute"
             )
 
+            return True
+
         except Exception as e:
             self._logger.error(
                 "Failed to arm OctoPi Tapo shutdown timer: %s",
                 e,
             )
-
+            
+            return False
+    
     # Run the OctoPi shutdown sequence in the background
     def _octopi_shutdown_sequence(self):
-        asyncio.run(self._arm_octopi_tapo_timer())
-        self._shutdown_octopi()
+        timer_armed = asyncio.run(
+            self._arm_octopi_tapo_timer()
+        )
+
+        if timer_armed:
+            self._shutdown_octopi()
+        else:
+            self._logger.error(
+                "OctoPi shutdown cancelled because the Tapo timer could not be armed"
+            )
     
     # Request a clean shutdown of OctoPi
     def _shutdown_octopi(self):
@@ -347,7 +368,6 @@ class TapoAutoShutdownPlugin(
 
             # OctoPi shutdown
             "octopi_shutdown_enabled": False,
-            "octopi_shutdown_delay": 60,
 
             # Obico
             "obico_monitor_delay": 60,
