@@ -5,7 +5,7 @@ from importlib.metadata import version
 
 import octoprint.plugin
 from octoprint.systemcommands import system_command_manager
-from tapo import ApiClient
+from tapo import ApiClient, PowerState
 import octoprint_obico
 
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
@@ -218,6 +218,28 @@ class TapoAutoShutdownPlugin(
                 "Failed to disable Obico AI monitoring: %s", e
             )
 
+    # Arm the OctoPi Tapo P110 shutdown timer
+    async def _arm_octopi_tapo_timer(self):
+        username = self._settings.get(["octopi_tapo_username"])
+        password = self._settings.get(["octopi_tapo_password"])
+        ip = self._settings.get(["octopi_tapo_ip"])
+
+        try:
+            client = ApiClient(username, password)
+            plug = await client.p110(ip)
+
+            await plug.set_timer(1, PowerState.Off)
+
+            self._logger.info(
+                "OctoPi Tapo P110 shutdown timer armed for 1 minute"
+            )
+
+        except Exception as e:
+            self._logger.error(
+                "Failed to arm OctoPi Tapo shutdown timer: %s",
+                e,
+            )
+    
     # Request a clean shutdown of OctoPi
     def _shutdown_octopi(self):
         """
