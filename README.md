@@ -21,7 +21,7 @@ Settings
 The plugin provides settings for:
 
 * Two unique Tapo P110 IP addresses
-* Tapo username, Tapo password, usually the same from the Tapo App
+* Tapo username, Tapo password, both usually the same from the Tapo App
 * Tapo shutdown delay
 * Obico AI monitoring delay
 
@@ -29,8 +29,8 @@ Requirements
 
 * OctoPrint
 * Tapo P110 smart plug
-* tapo Python package 0.9.0 or newer
-* Obico plugin for Obico AI monitoring features
+* Tapo Python package 0.9.0 or newer
+* Obico plugin for Obico AI monitoring features, with paid AI hours.
 
 Installation
 
@@ -38,7 +38,7 @@ Install through OctoPrint’s Plugin Manager using the GitHub release package.
 
 Development
 
-This is an independently developed OctoPrint plugin by SpideRaY.
+This is an independently developed OctoPrint plugin by SpideRaY. To save power and the planet
 
 GitHub: https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 
