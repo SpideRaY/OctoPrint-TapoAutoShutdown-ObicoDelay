@@ -87,18 +87,17 @@ class TapoAutoShutdownPlugin(
                     target=self._octopi_shutdown_sequence,
                     daemon=True,
                 ).start()
-        else:
-            
+            else:         
             # Existing Tapo shutdown behaviour
-            self._logger.info(
-                "Print completed - starting shutdown timer"
-            )
+                self._logger.info(
+                    "Print completed - starting shutdown timer"
+                )
 
-            threading.Thread(
-                target=self._delayed_shutdown,
-                daemon=True,
-            ).start()
-
+                threading.Thread(
+                    target=self._delayed_shutdown,
+                    daemon=True,
+                ).start()
+                            
         # Cancel the Obico countdown if the print is cancelled or fails
         elif event in (
             "PrintCancelled",
