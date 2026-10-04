@@ -69,11 +69,11 @@ class TapoAutoShutdownPlugin(
             )
 
             if (
-            self._successful_print
-            and self._settings.get(["octopi_shutdown_enabled"])
-            and self._settings.get(["octopi_tapo_enabled"])
+                self._successful_print
+                and self._settings.get(["octopi_shutdown_enabled"])
+                and self._settings.get(["octopi_tapo_enabled"])
+            ):
                 
-        ):
             self._logger.info(
                 "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
             )
