@@ -38,6 +38,35 @@
 </div>
 
 <div class="control-group">
+    <label class="control-label">OctoPi Tapo P110</label>
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox"
+                data-bind="checked: settings.plugins.tapoautoshutdown.octopi_tapo_enabled">
+            Enable OctoPi Tapo P110
+        </label>
+        <p class="help-block">
+            Enable control of a second Tapo P110 that powers the Raspberry Pi running OctoPrint.
+        </p>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Shut down OctoPi</label>
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox"
+                data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
+            Shut down OctoPi after successful timelapse rendering
+        </label>
+        <p class="help-block">
+            After a successful print and completed timelapse rendering, safely shut down OctoPi before switching off the OctoPi Tapo P110.
+        </p>
+    </div>
+</div>
+
+
+<div class="control-group">
     <label class="control-label">Obico AI delay (minutes)</label>
     <div class="controls">
         <input type="number"
