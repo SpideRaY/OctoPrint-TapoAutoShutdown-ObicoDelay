@@ -5,7 +5,7 @@ from importlib.metadata import version
 
 import octoprint.plugin
 from octoprint.systemcommands import system_command_manager
-from tapo import ApiClient, PowerState
+from tapo import ApiClient
 import octoprint_obico
 
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
@@ -250,8 +250,6 @@ class TapoAutoShutdownPlugin(
         try:
             client = ApiClient(username, password)
             plug = await client.p110(ip)
-
-            await plug.set_timer(1, PowerState.Off)
 
             self._logger.info(
                 "OctoPi Tapo P110 shutdown timer armed for 1 minute"
