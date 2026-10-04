@@ -68,12 +68,15 @@ class TapoAutoShutdownPlugin(
                 "Timelapse rendering completed successfully"
             )
 
+        elif event == "PrintDone":
+            self._successful_print = True
+            self._cancel_obico_timer()
+            self._disable_obico_monitoring()
+
         if (
-           self._successful_print
-           and self._settings.get(["octopi_shutdown_enabled"])
-           and self._settings.get(["octopi_tapo_enabled"])
-           ):
-                
+            self._settings.get(["octopi_shutdown_enabled"])
+            and self._settings.get(["octopi_tapo_enabled"])
+        ):
             self._logger.info(
                 "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
             )
@@ -82,6 +85,25 @@ class TapoAutoShutdownPlugin(
                 target=self._octopi_shutdown_sequence,
                 daemon=True,
             ).start()
+       else:
+           
+        # Existing Tapo shutdown behaviour
+        self._logger.info(
+            "Print completed - starting shutdown timer"
+        )
+
+        threading.Thread(
+            target=self._delayed_shutdown,
+            daemon=True,
+        ).start()
+
+elif event in (
+    "PrintCancelled",
+    "PrintFailed",
+):
+    self._successful_print = False
+    self._cancel_obico_timer()
+    self._disable_obico_monitoring()
         
         # Handle a successfully completed print
         elif event == "PrintDone":
