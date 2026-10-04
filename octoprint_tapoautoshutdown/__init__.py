@@ -4,6 +4,7 @@ import time
 from importlib.metadata import version
 
 import octoprint.plugin
+from octoprint.systemcommands import system_command_manager
 from tapo import ApiClient
 import octoprint_obico
 
@@ -217,6 +218,23 @@ class TapoAutoShutdownPlugin(
                 "Failed to disable Obico AI monitoring: %s", e
             )
 
+    # Request a clean shutdown of OctoPi
+    def _shutdown_octopi(self):
+        """
+        Request a clean shutdown of the Raspberry Pi running OctoPrint.
+        """       
+        try:
+            self._logger.info(
+                "Requesting clean OctoPi shutdown"
+            )
+            system_command_manager().perform_system_shutdown() 
+
+        except Exception as e:
+            self._logger.error(
+                "Failed to request OctoPi shutdown: %s",
+                e,
+            )
+    
     def _delayed_shutdown(self):
 
         try:
