@@ -268,13 +268,26 @@ class TapoAutoShutdownPlugin(
         
     def get_settings_defaults(self):
         return {
+            # Printer Tapo P110
             "username": "",
             "password": "",
             "ip": "",
             "tapo_shutdown_delay": 5,
-            "obico_monitor_delay": 60,
-        }
 
+            # OctoPi Tapo P110
+            "octopi_tapo_enabled": False,
+            "octopi_tapo_username": "",
+            "octopi_tapo_password": "",
+            "octopi_tapo_ip": "",
+
+            # OctoPi shutdown
+            "octopi_shutdown_enabled": False,
+            "octopi_shutdown_delay": 60,
+
+            # Obico
+            "obico_monitor_delay": 60,
+    }
+        
     def get_settings_version(self):
         return 1
         
