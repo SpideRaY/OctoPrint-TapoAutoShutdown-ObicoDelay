@@ -1,4 +1,4 @@
-OctoPrint-TapoAutoShutdown
+OctoPrint-TapoAutoShutdown v0.2.0
 
 OctoPrint plugin for automatically controlling a Tapo P110 smart plug and managing Obico AI monitoring around your prints.
 
