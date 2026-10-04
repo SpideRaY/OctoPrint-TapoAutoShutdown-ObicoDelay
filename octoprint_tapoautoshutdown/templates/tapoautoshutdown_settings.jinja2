@@ -1,5 +1,5 @@
 <div class="control-group">
-    <label class="control-label">Tapo P110 IP address</label>
+    <label class="control-label">Printer Tapo P110 IP address</label>
     <div class="controls">
         <input type="text"
             class="input-block-level"
@@ -8,7 +8,7 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Tapo username</label>
+    <label class="control-label">Printer Tapo username</label>
     <div class="controls">
         <input type="text"
             class="input-block-level"
@@ -17,7 +17,7 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Tapo password</label>
+    <label class="control-label">Printer Tapo password</label>
     <div class="controls">
         <input type="password"
             class="input-block-level"
@@ -26,13 +26,40 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Shutdown delay (minutes)</label>
+    <label class="control-label">OctoPi Tapo P110 IP address</label>
+    <div class="controls">
+        <input type="text"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_ip">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">OctoPi Tapo username</label>
+    <div class="controls">
+        <input type="text"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_username">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">OctoPi Tapo password</label>
+    <div class="controls">
+        <input type="password"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_password">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Printer Shutdown delay (minutes)</label>
     <div class="controls">
         <input type="number"
             class="input-block-level"
             data-bind="value: settings.plugins.tapoautoshutdown.tapo_shutdown_delay">
         	<p class="help-block">
-            	Time to wait after a completed print before switching the P110 off.
+            	Time to wait after a completed print before switching the Printer P110 off.
         	</p>
     </div>
 </div>
