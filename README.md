@@ -4,8 +4,11 @@ OctoPrint plugin for automatically controlling a Tapo P110 smart plug and managi
 
 Features
 
-* Automatically switches the Tapo P110 off after a completed print.
-* Configurable Tapo shutdown delay in minutes.
+* Automatically switches the Printer Tapo P110 off after a completed print.
+* Configurable Printer Tapo shutdown delay in minutes.
+* Automatically switches the OctoPi Tapo P110 off after a completed print, and completed video rendering
+* Preset Octopi Tapo shutdown delay in minutes.
+* 
 * Automatically disables Obico AI when a print starts.
 * Configurable Obico AI monitoring delay.
 * Enables Obico AI after the selected delay if the print is still running.
