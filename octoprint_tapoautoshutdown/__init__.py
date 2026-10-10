@@ -59,18 +59,28 @@ class TapoAutoShutdownPlugin(
 
     def on_event(self, event, payload):
 
-        # Start Obico countdown when a print starts
+        # Start a new print and reset the event flags
         if event == "PrintStarted":
             self._successful_print = False
+            self._timelapse_done = False
+            self._timelapse_failed = False
             self._disable_obico_monitoring()
             self._start_obico_timer()
 
-        # Handle completed timelapse rendering
+        # Record successful timelapse rendering
         elif event == "MovieDone":
+            self._timelapse_done = True
             self._logger.info(
                 "Timelapse rendering completed successfully"
             )
-        
+            self._maybe_start_octopi_shutdown()
+
+        # Record failed timelapse rendering
+        elif event == "MovieFailed":
+            self._timelapse_failed = True
+            self._logger.error(
+                "Timelapse rendering failed - automatic OctoPi shutdown cancelled"
+            )    
         # Handle a successfully completed print
         elif event == "PrintDone":
             self._successful_print = True
@@ -81,35 +91,58 @@ class TapoAutoShutdownPlugin(
                 self._settings.get(["octopi_shutdown_enabled"])
                 and self._settings.get(["octopi_tapo_enabled"])
             ):
-                
                 self._logger.info(
-                    "OctoPi shutdown and Tapo control enabled - starting shutdown sequence"
+                    "Print completed - waiting for timelapse rendering"
                 )
-
-                threading.Thread(
-                    target=self._octopi_shutdown_sequence,
-                    daemon=True,
-                ).start()
-            else:         
-            # Existing Tapo shutdown behaviour
+                self._maybe_start_octopi_shutdown()
+            else:
+                # Preserve existing printer-plug shutdown behaviour
                 self._logger.info(
-                    "Print completed - starting shutdown timer"
+                    "Print completed - starting printer shutdown timer"
                 )
-
                 threading.Thread(
                     target=self._delayed_shutdown,
                     daemon=True,
                 ).start()
-                            
-        # Cancel the Obico countdown if the print is cancelled or fails
-        elif event in (
-            "PrintCancelled",
-            "PrintFailed",
-        ):
-            self._successful_print = False
-            self._cancel_obico_timer()
-            self._disable_obico_monitoring()          
 
+        # Cancel Obico countdown if the print is cancelled or fails
+        elif event in ("PrintCancelled", "PrintFailed"):
+            self._successful_print = False
+            self._timelapse_done = False
+            self._timelapse_failed = False
+            self._cancel_obico_timer()
+            self._disable_obico_monitoring()
+
+    def _maybe_start_octopi_shutdown(self):
+        if not self._successful_print:
+            return
+
+        if self._timelapse_failed:
+            self._logger.error(
+                "OctoPi shutdown cancelled because timelapse rendering failed"
+            )
+            return
+
+        if not self._timelapse_done:
+            self._logger.info(
+                "Waiting for timelapse rendering to finish"
+            )
+            return
+
+        if not (
+            self._settings.get(["octopi_shutdown_enabled"])
+            and self._settings.get(["octopi_tapo_enabled"])
+        ):
+            return
+
+        self._logger.info(
+            "Print and timelapse complete - starting OctoPi shutdown sequence"
+        )
+
+        threading.Thread(
+            target=self._octopi_shutdown_sequence,
+            daemon=True,
+        ).start()
 
     def _start_obico_timer(self):
         self._cancel_obico_timer()
