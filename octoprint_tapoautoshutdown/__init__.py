@@ -117,6 +117,8 @@ class TapoAutoShutdownPlugin(
             self._disable_obico_monitoring()
 
     def _maybe_start_octopi_shutdown(self):
+        if self._octopi_shutdown_started:
+            return
         if not self._successful_print:
             return
 
@@ -138,6 +140,7 @@ class TapoAutoShutdownPlugin(
         ):
             return
 
+        self._octopi_shutdown_started = True
         self._logger.info(
             "Print and timelapse complete - starting OctoPi shutdown sequence"
         )
