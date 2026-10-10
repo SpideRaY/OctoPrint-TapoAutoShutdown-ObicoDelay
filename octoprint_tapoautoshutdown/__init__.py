@@ -411,7 +411,7 @@ class TapoAutoShutdownPlugin(
 
             # Obico
             "obico_monitor_delay": 60,
-    }
+        }
         
     def get_settings_version(self):
         return 1
