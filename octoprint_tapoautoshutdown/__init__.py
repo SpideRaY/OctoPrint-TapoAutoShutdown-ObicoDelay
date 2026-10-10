@@ -272,7 +272,7 @@ class TapoAutoShutdownPlugin(
                 or timer.remaining_s is None
                 or timer.remaining_s <= 0
             ):
-            self._logger.error(
+                self._logger.error(
                     "OctoPi shutdown cancelled: Tapo timer verification failed"
                 )
                 try:
