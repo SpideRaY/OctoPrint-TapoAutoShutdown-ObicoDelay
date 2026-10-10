@@ -89,6 +89,25 @@ class TapoAutoShutdownPlugin(
             self._cancel_obico_timer()
             self._disable_obico_monitoring()
 
+            # Start printer shutdown independently
+            username = self._settings.get(["username"])
+            password = self._settings.get(["password"])
+            ip = self._settings.get(["ip"])
+
+            if username and password and ip:
+                self._logger.info(
+                    "Print completed - starting printer shutdown timer"
+                )
+                threading.Thread(
+                    target=self._delayed_shutdown,
+                    daemon=True,
+                ).start()
+            else:
+                self._logger.info(
+                    "Printer shutdown skipped - Tapo credentials or IP missing"
+                )
+
+            # Check whether OctoPi shutdown should proceed
             if (
                 self._settings.get(["octopi_shutdown_enabled"])
                 and self._settings.get(["octopi_tapo_enabled"])
@@ -97,25 +116,6 @@ class TapoAutoShutdownPlugin(
                     "Print completed - waiting for timelapse rendering"
                 )
                 self._maybe_start_octopi_shutdown()
-                
-            else:
-                # Only start printer shutdown if its plug is configured
-                username = self._settings.get(["username"])
-                password = self._settings.get(["password"])
-                ip = self._settings.get(["ip"])
-
-                if username and password and ip:
-                    self._logger.info(
-                        "Print completed - starting printer shutdown timer"
-                    )
-                    threading.Thread(
-                        target=self._delayed_shutdown,
-                        daemon=True,
-                    ).start()
-                else:
-                    self._logger.info(
-                        "Printer shutdown skipped - Tapo credentials or IP missing"
-                    )
         
 
         # Cancel Obico countdown if the print is cancelled or fails
