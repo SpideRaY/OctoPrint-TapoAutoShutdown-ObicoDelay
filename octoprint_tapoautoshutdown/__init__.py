@@ -406,7 +406,6 @@ class TapoAutoShutdownPlugin(
                 self._clear_octopi_tapo_timer()
             )
     
-    
     def _delayed_shutdown(self):
 
         try:
