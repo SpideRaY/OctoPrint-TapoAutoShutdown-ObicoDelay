@@ -24,6 +24,7 @@ class TapoAutoShutdownPlugin(
         self._successful_print = False
         self._timelapse_done = False
         self._timelapse_failed = False
+        self._octopi_shutdown_started = False
 
     def on_after_startup(self):
         self._logger.info("Tapo Auto Shutdown started")
@@ -64,9 +65,10 @@ class TapoAutoShutdownPlugin(
             self._successful_print = False
             self._timelapse_done = False
             self._timelapse_failed = False
+            self._octopi_shutdown_started = False
             self._disable_obico_monitoring()
             self._start_obico_timer()
-
+           
         # Record successful timelapse rendering
         elif event == "MovieDone":
             self._timelapse_done = True
