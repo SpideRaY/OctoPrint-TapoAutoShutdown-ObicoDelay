@@ -97,15 +97,26 @@ class TapoAutoShutdownPlugin(
                     "Print completed - waiting for timelapse rendering"
                 )
                 self._maybe_start_octopi_shutdown()
+                
             else:
-                # Preserve existing printer-plug shutdown behaviour
-                self._logger.info(
-                    "Print completed - starting printer shutdown timer"
-                )
-                threading.Thread(
-                    target=self._delayed_shutdown,
-                    daemon=True,
-                ).start()
+                # Only start printer shutdown if its plug is configured
+                username = self._settings.get(["username"])
+                password = self._settings.get(["password"])
+                ip = self._settings.get(["ip"])
+
+                if username and password and ip:
+                    self._logger.info(
+                        "Print completed - starting printer shutdown timer"
+                    )
+                    threading.Thread(
+                        target=self._delayed_shutdown,
+                        daemon=True,
+                    ).start()
+                else:
+                    self._logger.info(
+                        "Printer shutdown skipped - Tapo credentials or IP missing"
+                    )
+        
 
         # Cancel Obico countdown if the print is cancelled or fails
         elif event in ("PrintCancelled", "PrintFailed"):
