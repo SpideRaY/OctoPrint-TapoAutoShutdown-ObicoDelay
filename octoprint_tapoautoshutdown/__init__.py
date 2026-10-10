@@ -22,6 +22,8 @@ class TapoAutoShutdownPlugin(
         self._obico_timer = None
         self._obico_timer_lock = threading.Lock()
         self._successful_print = False
+        self._timelapse_done = False
+        self._timelapse_failed = False
 
     def on_after_startup(self):
         self._logger.info("Tapo Auto Shutdown started")
