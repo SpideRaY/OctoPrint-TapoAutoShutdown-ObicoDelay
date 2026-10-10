@@ -93,6 +93,7 @@ class TapoAutoShutdownPlugin(
                 self._settings.get(["octopi_shutdown_enabled"])
                 and self._settings.get(["octopi_tapo_enabled"])
             ):
+                self._octopi_shutdown_started = True
                 self._logger.info(
                     "Print completed - waiting for timelapse rendering"
                 )
