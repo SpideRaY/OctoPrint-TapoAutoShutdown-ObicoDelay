@@ -247,23 +247,65 @@ class TapoAutoShutdownPlugin(
         password = self._settings.get(["octopi_tapo_password"])
         ip = self._settings.get(["octopi_tapo_ip"])
 
+        if not username or not password or not ip:
+            self._logger.error(
+                "OctoPi shutdown cancelled: Tapo credentials or IP are missing"
+            )
+            return False
+            
+        client = None
+        plug = None
+
         try:
             client = ApiClient(username, password)
             plug = await client.p110(ip)
 
-            self._logger.info(
-                "OctoPi Tapo P110 shutdown timer armed for 1 minute"
-            )
+            # Allow 15 minutes for Linux to shut down cleanly
+            await plug.set_timer(900, PowerState.Off)
 
+            # Verify the timer was accepted
+            timer = await plug.get_timer()
+
+            if (
+                timer is None
+                or timer.desired_state != PowerState.Off
+                or timer.remaining_s is None
+                or timer.remaining_s <= 0
+            ):
+            self._logger.error(
+                    "OctoPi shutdown cancelled: Tapo timer verification failed"
+                )
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear unverified Tapo timer: %s",
+                        clear_error,
+                    )
+                return False
+            self._logger.info(
+                "OctoPi Tapo shutdown timer verified: power off in approximately "
+                "%s seconds",
+                timer.remaining_s,
+            )
             return True
 
         except Exception as e:
             self._logger.error(
-                "Failed to arm OctoPi Tapo shutdown timer: %s",
+                "Failed to arm or verify OctoPi Tapo shutdown timer: %s",
                 e,
             )
-            
+            if plug is not None:
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear Tapo timer after error: %s",
+                        clear_error,
+                    )
             return False
+        
+
     
     # Run the OctoPi shutdown sequence in the background
     def _octopi_shutdown_sequence(self):
