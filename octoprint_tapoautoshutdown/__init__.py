@@ -371,22 +371,41 @@ class TapoAutoShutdownPlugin(
                 "OctoPi shutdown cancelled because the Tapo timer could not be armed"
             )
     
+    # Clear the OctoPi plug timer if shutdown fails
+    async def _clear_octopi_tapo_timer(self):
+        username = self._settings.get(["octopi_tapo_username"])
+        password = self._settings.get(["octopi_tapo_password"])
+        ip = self._settings.get(["octopi_tapo_ip"])
+
+        try:
+            client = ApiClient(username, password)
+            plug = await client.p110(ip)
+            await plug.clear_timer()
+            self._logger.info(
+                "OctoPi Tapo shutdown timer cleared"
+            )
+        except Exception as e:
+            self._logger.error(
+                "Failed to clear OctoPi Tapo timer: %s",
+                e,
+            )
+
     # Request a clean shutdown of OctoPi
     def _shutdown_octopi(self):
-        """
-        Request a clean shutdown of the Raspberry Pi running OctoPrint.
-        """       
         try:
             self._logger.info(
                 "Requesting clean OctoPi shutdown"
             )
-            system_command_manager().perform_system_shutdown() 
-
+            system_command_manager().perform_system_shutdown()
         except Exception as e:
             self._logger.error(
                 "Failed to request OctoPi shutdown: %s",
                 e,
             )
+            asyncio.run(
+                self._clear_octopi_tapo_timer()
+            )
+    
     
     def _delayed_shutdown(self):
 
