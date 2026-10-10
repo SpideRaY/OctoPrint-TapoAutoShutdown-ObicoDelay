@@ -6,6 +6,7 @@ from importlib.metadata import version
 import octoprint.plugin
 from octoprint.systemcommands import system_command_manager
 from tapo import ApiClient
+from tapo.responses import PowerState
 import octoprint_obico
 
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
