@@ -365,8 +365,6 @@ class TapoAutoShutdownPlugin(
                         clear_error,
                     )
             return False
-        
-
     
     # Run the OctoPi shutdown sequence in the background
     def _octopi_shutdown_sequence(self):
