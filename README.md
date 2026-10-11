@@ -71,18 +71,32 @@ The plugin provides the following configuration options in the OctoPrint setting
 
 ## Compatibility
 
-- The plugin is developed for the TP-Link Tapo P110 smart plug.
-- The OctoPi shutdown functionality has been developed and checked using the following setup:
+OctoPrint-TapoAutoShutdown is designed for use with TP-Link Tapo P110 smart plugs. The printer shutdown and OctoPi shutdown features use separate smart plugs and can be configured independently.
+Obico AI monitoring features require the Obico OctoPrint plugin.
+Compatibility with other Tapo hardware revisions, firmware versions, and software configurations may vary.
 
-- Raspberry Pi 4 Model B.
-- OctoPrint 1.11.8.
-- OctoPi 1.1.0.
-- Python 3.11.2.
-- TP-Link Tapo P110 UK hardware revision 1.0.
-- Tapo P110 firmware 1.4.8 Build 260804.
-- Python tapo package 0.11.1.
+### Tested Setup
 
-*Firmware versions and available features may vary by hardware revision and region. Check the Tapo app for the firmware installed on your smart plug.*
+The following configuration was used during development and testing of the OctoPi shutdown functionality.
+
+### Hardware
+
+Raspberry Pi 4 Model B (4 GB RAM)
+TP-Link Tapo P110 UK smart plug, hardware revision 1.0
+
+### Software
+
+OctoPi 1.1.0
+OctoPrint 1.11.8
+Python 3.11.2 (32-bit)
+Python tapo package 0.11.1
+
+### Tapo Firmware
+
+Version 1.4.8, build 260804
+
+*Firmware versions may vary by hardware revision and region. Check the Tapo app for the version installed on your smart plug.*
+*The tested configuration does not guarantee compatibility with every combination of hardware, firmware, or software versions.*
 *Other hardware and software combinations may work but have not necessarily been tested.*
 
 ## Installation
