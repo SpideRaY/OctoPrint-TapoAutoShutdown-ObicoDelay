@@ -8,24 +8,6 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">OctoPi Tapo username</label>
-    <div class="controls">
-        <input type="text"
-            class="input-block-level"
-            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_username">
-    </div>
-</div>
-
-<div class="control-group">
-    <label class="control-label">OctoPi Tapo password</label>
-    <div class="controls">
-        <input type="password"
-            class="input-block-level"
-            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_password">
-    </div>
-</div>
-
-<div class="control-group">
     <label class="control-label">Printer Tapo P110 IP address</label>
     <div class="controls">
         <input type="text"
@@ -49,18 +31,6 @@
         <input type="password"
             class="input-block-level"
             data-bind="value: settings.plugins.tapoautoshutdown.password">
-    </div>
-</div>
-
-<div class="control-group">
-    <label class="control-label">Printer shutdown delay (minutes)</label>
-    <div class="controls">
-        <input type="number"
-            class="input-block-level"
-            data-bind="value: settings.plugins.tapoautoshutdown.tapo_shutdown_delay">
-        	<p class="help-block">
-            	Time to wait after a completed print before switching the Printer P110 off.
-        	</p>
     </div>
 </div>
 
@@ -92,6 +62,18 @@
             off after the configured delay; this does not confirm that Linux
             has finished shutting down.
         </p>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Printer shutdown delay (minutes)</label>
+    <div class="controls">
+        <input type="number"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.tapo_shutdown_delay">
+        	<p class="help-block">
+            	Time to wait after a completed print before switching the Printer P110 off.
+        	</p>
     </div>
 </div>
 
