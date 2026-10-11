@@ -77,13 +77,13 @@ Compatibility with other Tapo hardware revisions, firmware versions, and softwar
 
 ### Tested Setup
 
-- The following configuration was used during development and testing of the OctoPi shutdown functionality.
+The following configuration was used during development and testing of the OctoPi shutdown functionality, you must have at least the latest Python Tapo package installed.
 
 ### Hardware
 
 - Raspberry Pi 4 Model B (4 GB RAM)
 - TP-Link Tapo P110 UK smart plug, hardware revision 1.0
-
+  
 ### Software
 
 - OctoPi 1.1.0
