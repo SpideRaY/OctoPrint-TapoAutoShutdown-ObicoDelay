@@ -73,26 +73,26 @@ The plugin provides the following configuration options in the OctoPrint setting
 - The plugin is developed for the TP-Link Tapo P110 smart plug.
 - The OctoPi shutdown functionality has been developed and checked using the following setup:
 
-Raspberry Pi 4 Model B.
-OctoPrint 1.11.8.
-OctoPi 1.1.0.
-Python 3.11.2.
-TP-Link Tapo P110 UK hardware revision 1.0.
-Tapo P110 firmware 1.4.8 Build 260804.
-Python tapo package 0.11.1.
+- Raspberry Pi 4 Model B.
+- OctoPrint 1.11.8.
+- OctoPi 1.1.0.
+- Python 3.11.2.
+- TP-Link Tapo P110 UK hardware revision 1.0.
+- Tapo P110 firmware 1.4.8 Build 260804.
+- Python tapo package 0.11.1.
 
 *Firmware versions and available features may vary by hardware revision and region. Check the Tapo app for the firmware installed on your smart plug.*
 *Other hardware and software combinations may work but have not necessarily been tested.*
 
 ## Installation
 
-- Open OctoPrint in your browser.
-- Navigate to Settings → Plugin Manager.
-- Select Get More….
-- Use the option to install a plugin from a URL.
-- Enter the GitHub ZIP URL for the desired branch or release.
-- Install the plugin and allow OctoPrint to restart when prompted.
-- Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
+1. Open OctoPrint in your browser
+2. Navigate to Settings → Plugin Manager.
+3. Select Get More….
+4. Use the option to install a plugin from a URL.
+5. Enter the GitHub ZIP URL for the desired branch or release.
+6. Install the plugin and allow OctoPrint to restart when prompted.
+7. Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
 
 ## GitHub repository:
 
