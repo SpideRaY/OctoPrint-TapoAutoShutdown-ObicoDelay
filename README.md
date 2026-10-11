@@ -12,7 +12,7 @@
 * Configurable Obico AI monitoring delay.
 * Automatic enabling and disabling of Obico AI monitoring based on print status.
 
-## v0.3.0 New Features include:
+### v0.3.0 New Features include:
 
 * Separate IP addresses for the printer and OctoPi smart plugs.
 * Shared Tapo account credentials for both plugs.
