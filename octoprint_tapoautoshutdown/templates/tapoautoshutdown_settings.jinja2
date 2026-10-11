@@ -102,8 +102,10 @@
             step="1"
             data-bind="value: settings.plugins.tapoautoshutdown.octopi_shutdown_delay">
         <p class="help-block">
-            Time to allow Linux to shut down before the OctoPi Tapo P110 switches off.
-            Default: 15 minutes. Allowed range: 1–60 minutes.
+            After a successful print and completed timelapse rendering,
+            request a clean OctoPi shutdown. The OctoPi Tapo P110 switches
+            off after the configured delay; this does not confirm that Linux
+            has finished shutting down.
         </p>
     </div>
 </div>
