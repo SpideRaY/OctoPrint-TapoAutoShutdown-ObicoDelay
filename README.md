@@ -34,7 +34,7 @@
 
 ## Settings
 
-- The plugin provides the following configuration options in the OctoPrint settings interface.
+The plugin provides the following configuration options in the OctoPrint settings interface.
 
 ### Setting	Description
 
