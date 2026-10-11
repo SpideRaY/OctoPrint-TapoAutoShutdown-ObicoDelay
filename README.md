@@ -1,8 +1,35 @@
 # **OctoPrint-TapoAutoShutdown v0.3.0**
 
-1. An OctoPrint plugin for automatically controlling TP-Link Tapo P110 smart plugs and managing Obico AI failure detection.
-2. The plugin provides independent shutdown control for your printer and the Raspberry Pi running OctoPrint.
-3. Configurable Obico AI monitoring delays to help reduce unnecessary AI-hour usage.
+## Version differences
+
+Version 0.2.0 — Printer control and Obico AI ans provides automatic control of a Tapo P110 smart plug connected to the 3D printer, together with configurable Obico AI failure detection delays.
+Version 0.3.0 — Builds on the existing printer control and Obico AI functionality by adding support for a second Tapo P110 to control power to the Raspberry Pi running OctoPrint.
+Version 0.3.0 — Additional OctoPi shutdown control
+
+### Features include:
+
+* Automatic printer plug shutdown after a completed print.
+* Configurable printer shutdown delay.
+* Configurable Obico AI monitoring delay.
+* Automatic enabling and disabling of Obico AI monitoring based on print status.
+
+## Additional features include:
+
+* Separate IP addresses for the printer and OctoPi smart plugs.
+* Shared Tapo account credentials for both plugs.
+* Independent printer and OctoPi shutdown settings.
+* Configurable delay before the OctoPi plug switches off.
+* Automatic OctoPi shutdown after a successful print and completed timelapse rendering.
+* Verification of the OctoPi plug’s power-off timer before requesting a clean Linux shutdown.
+
+The OctoPi shutdown feature is optional and remains disabled unless explicitly enabled in the plugin settings.
+Important: The OctoPi plug’s timer operates independently of Linux. Allow sufficient time for the Raspberry Pi to shut down cleanly before the timer cuts power.
+
+## Upgrading from version 0.2.0
+
+Version 0.3.0 retains the existing printer shutdown and Obico AI monitoring functionality while introducing the additional OctoPi plug controls.
+To use automatic OctoPi shutdown, a second compatible Tapo P110 is required. Configure its IP address separately from the printer plug. Both plugs can use the same Tapo account credentials.
+After upgrading, review the plugin settings and verify the configuration before enabling automatic OctoPi shutdown.
 
 ## Features
 
