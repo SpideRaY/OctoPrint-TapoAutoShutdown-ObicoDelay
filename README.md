@@ -2,19 +2,26 @@
 
 ## Version differences
 
-- v0.2.0 — Original version provides printer Tapo P110 shutdown control and Obico AI monitoring management, with fixed or customizable delays.
-- v0.3.0 — Improved OctoPi shutdown retains the printer shutdown and Obico AI features while improving the OctoPi shutdown sequence. It also contains basic OctoPi shutdown functionality, using separate Tapo credentials and a one-second power-off timer.
+v0.2.0 — Original version
 
-* Uses shared Tapo account credentials for both plugs.
-* Maintains separate IP addresses for the printer and OctoPi plugs.
-* Provides a configurable OctoPi shutdown delay.
-* Waits for successful timelapse rendering.
-* Arms and verifies the OctoPi power-off timer before requesting a clean Linux shutdown.
+Provides automatic printer Tapo P110 shutdown and Obico AI monitoring management, with configurable delays.
+
+* Controls the Tapo P110 connected to the 3D printer.
+* Provides a configurable printer shutdown delay.
+* Manages Obico AI failure detection around print jobs.
+
+v0.3.0 — Additional OctoPi shutdown control
+
+Retains the existing printer shutdown and Obico AI features and adds improved control of a second Tapo P110 connected to the Raspberry Pi running OctoPrint.
+
+* Adds a separate Tapo P110 IP address for the Raspberry Pi.
+* Uses the same Tapo account credentials for both smart plugs.
+* Provides a configurable OctoPi power-off timer.
+* Waits for successful timelapse rendering before starting the OctoPi shutdown sequence.
+* Verifies the power-off timer before requesting a clean Linux shutdown.
 * Attempts to clear the timer if the shutdown request fails.
 
-*The OctoPi shutdown feature remains optional and should be tested carefully before being enabled.*
-*The OctoPi shutdown feature is optional and remains disabled unless explicitly enabled in the plugin settings.*
-*Important: The OctoPi plug’s timer operates independently of Linux. Allow sufficient time for the Raspberry Pi to shut down cleanly before the timer cuts power.*
+*Important: The OctoPi shutdown feature is optional. The smart plug timer operates independently of Linux, so allow sufficient time for the Raspberry Pi to shut down cleanly before power is cut.*
 
 ## Upgrading from version 0.2.0
 
