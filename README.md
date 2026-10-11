@@ -21,8 +21,8 @@
 * Automatic OctoPi shutdown after a successful print and completed timelapse rendering.
 * Verification of the OctoPi plug’s power-off timer before requesting a clean Linux shutdown.
 
-The OctoPi shutdown feature is optional and remains disabled unless explicitly enabled in the plugin settings.
-Important: The OctoPi plug’s timer operates independently of Linux. Allow sufficient time for the Raspberry Pi to shut down cleanly before the timer cuts power.
+*The OctoPi shutdown feature is optional and remains disabled unless explicitly enabled in the plugin settings.*
+*Important: The OctoPi plug’s timer operates independently of Linux. Allow sufficient time for the Raspberry Pi to shut down cleanly before the timer cuts power.*
 
 ## Upgrading from version 0.2.0
 
