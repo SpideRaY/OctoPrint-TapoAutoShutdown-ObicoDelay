@@ -1,72 +1,77 @@
 # **OctoPrint-TapoAutoShutdown v0.3.0**
 
-An OctoPrint plugin for automatically controlling TP-Link Tapo P110 smart plugs and managing Obico AI failure detection around your 3D prints.
-
-The plugin provides independent shutdown control for your printer and the Raspberry Pi running OctoPrint, together with configurable Obico AI monitoring delays to help reduce unnecessary AI-hour usage.
+- An OctoPrint plugin for automatically controlling TP-Link Tapo P110 smart plugs and managing Obico AI failure detection around your 3D prints.
+- The plugin provides independent shutdown control for your printer and the Raspberry Pi running OctoPrint, together with configurable Obico AI monitoring delays to help reduce unnecessary AI-hour usage.
 
 ## Features
 
 ### Printer Tapo P110
-Automatically switches off the printer's Tapo P110 after a completed print.
-Configurable printer shutdown delay in minutes.
-Uses a dedicated IP address for the printer's smart plug.
-Controls the printer plug independently of the OctoPi plug.
+
+- Automatically switches off the printer's Tapo P110 after a completed print.
+- Configurable printer shutdown delay in minutes.
+- Uses a dedicated IP address for the printer's smart plug.
+- Controls the printer plug independently of the OctoPi plug.
 
 ### OctoPi Tapo P110
-Supports a second Tapo P110 to control power to the Raspberry Pi running OctoPrint.
-Uses a separate IP address for the OctoPi smart plug.
-Provides an option to enable or disable OctoPi plug control.
-Provides a separate option to enable or disable automatic OctoPi shutdown.
-Waits for successful timelapse rendering before starting the automatic shutdown sequence.
-Arms and verifies the Tapo power-off timer before requesting a clean Linux shutdown.
-Provides a configurable OctoPi shutdown delay in minutes.
-Cancels automatic shutdown if timelapse rendering fails.
-Obico AI monitoring
-Automatically disables Obico AI failure detection when a print starts.
-Provides a configurable delay before AI failure detection is enabled.
-Enables AI monitoring after the selected delay if the print is still running.
-Disables AI monitoring when a print completes, is cancelled, or fails.
-Setting the Obico delay to 0 enables AI monitoring immediately.
-Helps reduce unnecessary Obico AI-hour usage while the printer is idle or during the early part of a print.
-Settings
 
-The plugin provides the following configuration options in the OctoPrint settings interface.
+- Supports a second Tapo P110 to control power to the Raspberry Pi running OctoPrint.
+- Uses a separate IP address for the OctoPi smart plug.
+- Provides an option to enable or disable OctoPi plug control.
+- Provides a separate option to enable or disable automatic OctoPi shutdown.
+- Waits for successful timelapse rendering before starting the automatic shutdown sequence.
+- Arms and verifies the Tapo power-off timer before requesting a clean Linux shutdown.
+- Provides a configurable OctoPi shutdown delay in minutes.
+- Cancels automatic shutdown if timelapse rendering fails.
+
+### Obico AI monitoring
+
+- Automatically disables Obico AI failure detection when a print starts.
+-Provides a configurable delay before AI failure detection is enabled.
+- Enables AI monitoring after the selected delay if the print is still running.
+- Disables AI monitoring when a print completes, is cancelled, or fails.
+- Setting the Obico delay to 0 enables AI monitoring immediately.
+- Helps reduce unnecessary Obico AI-hour usage while the printer is idle or during the early part of a print.
+
+### Settings
+
+- The plugin provides the following configuration options in the OctoPrint settings interface.
 
 ## Setting	Description
-Tapo account username	Username and Password for the Tapo account
-Printer Tapo P110 IP address IP address of the 3D Printer's smart plug
-OctoPi Tapo P110 IP address	IP address of the Raspberry Pi's smart plug
-Enable OctoPi Tapo P110	Enables control of the second smart plug
-Shut down OctoPi	Enables automatic Raspberry Pi shutdown
-Printer shutdown delay	Time to wait before switching off the printer plug
-OctoPi shutdown delay	Time allowed for Linux to shut down before the Pi plug switches off
-Obico AI delay	Time to wait before enabling Obico AI failure detection
 
-Both smart plugs can use the same Tapo account credentials while retaining separate IP addresses and independent shutdown behaviour.
+- Tapo account username	Username and Password for the Tapo account
+- Printer Tapo P110 IP address IP address of the 3D Printer's smart plug
+- OctoPi Tapo P110 IP address	IP address of the Raspberry Pi's smart plug
+- Enable OctoPi Tapo P110	Enables control of the second smart plug
+- Shut down OctoPi	Enables automatic Raspberry Pi shutdown
+- Printer shutdown delay	Time to wait before switching off the printer plug
+- OctoPi shutdown delay	Time allowed for Linux to shut down before the Pi plug switches off
+- Obico AI delay	Time to wait before enabling Obico AI failure detection
+- Both smart plugs use the same Tapo account credentials while retaining separate IP addresses and independent shutdown behaviour.
 
 ## Shutdown safety
 
-Important: Automatic OctoPi shutdown is optional and should be enabled only after careful testing.
-When automatic OctoPi shutdown is enabled, the plugin waits for a successful print and completed timelapse rendering. It then attempts to arm and verify the Tapo P110 power-off timer before requesting a clean Linux shutdown.
-The smart plug timer operates independently of Linux. The plugin cannot guarantee that the Raspberry Pi has completely finished shutting down before the timer switches off the power.
-Choose a shutdown delay that provides sufficient time for your system to shut down cleanly. The default delay is 15 minutes, with a configured range of 1–60 minutes.
-If the Tapo timer cannot be armed and verified, the plugin cancels the automatic shutdown request.
-If the shutdown request fails after the timer has been armed, the plugin attempts to clear the timer.
-The printer shutdown feature is separate from the Raspberry Pi shutdown feature. Configure and test each independently.
+- Important: Automatic OctoPi shutdown is optional and should be enabled only after careful testing.
+- When automatic OctoPi shutdown is enabled, the plugin waits for a successful print and completed timelapse rendering. It then arms and verifies the Tapo P110 power-off timer before requesting a clean Linux shutdown.
+- The smart plug timer operates independently of Linux. The plugin cannot guarantee that the Raspberry Pi has completely finished shutting down before the timer switches off the power.
+- Choose a shutdown delay that provides sufficient time for your system to shut down cleanly. The default delay is 15 minutes, with a configured range of 1–60 minutes.
+- If the Tapo timer cannot be armed and verified, the plugin cancels the automatic shutdown request.
+- If the shutdown request fails after the timer has been armed, the plugin attempts to clear the timer.
+- The printer shutdown feature is separate from the Raspberry Pi shutdown feature. Configure and test each independently.
 
 ## Requirements
-OctoPrint installed on a compatible system.
-A TP-Link Tapo P110 smart plug for the printer.
-A second TP-Link Tapo P110 smart plug if OctoPi power control is required.
-A compatible Python environment.
-The Python tapo package, version 0.11.1 used in the current development setup.
-The Obico OctoPrint plugin for Obico AI monitoring features.
-An Obico plan with AI hours available for AI failure detection.
-Compatibility
 
-The plugin is developed for the TP-Link Tapo P110 smart plug.
+- OctoPrint installed on a compatible system.
+- A TP-Link Tapo P110 smart plug for the printer.
+- A second TP-Link Tapo P110 smart plug if OctoPi power control is required.
+- A compatible Python environment.
+- The Python tapo package, version 0.11.1 used in the current development setup.
+- The Obico OctoPrint plugin for Obico AI monitoring features.
+- An Obico plan with AI hours available for AI failure detection.
 
-The OctoPi shutdown functionality has been developed and checked using the following setup:
+## Compatibility
+
+- The plugin is developed for the TP-Link Tapo P110 smart plug.
+- The OctoPi shutdown functionality has been developed and checked using the following setup:
 
 Raspberry Pi 4 Model B.
 OctoPrint 1.11.8.
@@ -76,18 +81,18 @@ TP-Link Tapo P110 UK hardware revision 1.0.
 Tapo P110 firmware 1.4.8 Build 260804.
 Python tapo package 0.11.1.
 
-Firmware versions and available features may vary by hardware revision and region. Check the Tapo app for the firmware installed on your smart plug.
-
-Other hardware and software combinations may work but have not necessarily been tested.
+*Firmware versions and available features may vary by hardware revision and region. Check the Tapo app for the firmware installed on your smart plug.*
+*Other hardware and software combinations may work but have not necessarily been tested.*
 
 ## Installation
-Open OctoPrint in your browser.
-Navigate to Settings → Plugin Manager.
-Select Get More….
-Use the option to install a plugin from a URL.
-Enter the GitHub ZIP URL for the desired branch or release.
-Install the plugin and allow OctoPrint to restart when prompted.
-Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
+
+- Open OctoPrint in your browser.
+- Navigate to Settings → Plugin Manager.
+- Select Get More….
+- Use the option to install a plugin from a URL.
+- Enter the GitHub ZIP URL for the desired branch or release.
+- Install the plugin and allow OctoPrint to restart when prompted.
+- Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
 
 ## GitHub repository:
 
@@ -98,22 +103,22 @@ For the v0.3.0 development branch, the ZIP URL is:
 https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/heads/v0.3.0.zip
 
 ## Initial configuration and testing
-Configure the printer plug IP address.
-Configure the OctoPi plug IP address if using the second plug.
-Enter the Tapo account username and password.
-Configure the printer shutdown delay.
-Configure the OctoPi shutdown delay if required.
-Configure the Obico AI monitoring delay.
-Keep automatic OctoPi shutdown disabled until the configuration and shutdown sequence have been reviewed and tested.
-Check the OctoPrint logs for errors before enabling automatic shutdown.
 
-Do not interrupt a print or deliberately cut Raspberry Pi power as a test. Verify the Tapo timer behaviour and shutdown sequence safely before relying on automatic shutdown.
+- Configure the printer plug IP address.
+- Configure the OctoPi plug IP address if using the second plug.
+- Enter the Tapo account username and password.
+- Configure the printer shutdown delay.
+- Configure the OctoPi shutdown delay if required.
+- Configure the Obico AI monitoring delay.
+- Keep automatic OctoPi shutdown disabled until the configuration and shutdown sequence have been reviewed and tested.
+- Check the OctoPrint logs for errors before enabling automatic shutdown.
+- Do not interrupt a print or deliberately cut Raspberry Pi power as a test. Verify the Tapo timer behaviour and shutdown sequence safely before relying on automatic shutdown.
 
 ## Development
 
-This is an independently developed OctoPrint plugin by SpideRaY.
-The project aims to reduce unnecessary power consumption and Obico AI-hour usage while providing convenient, configurable smart-plug control for 3D printing.
-Development and testing are ongoing. Please report issues with relevant OctoPrint logs, plugin versions, hardware revisions and firmware details.
+- This is an independently developed OctoPrint plugin by SpideRaY.
+- The project aims to reduce unnecessary power consumption and Obico AI-hour usage while providing convenient, configurable smart-plug control for 3D printing.
+- Development and testing are ongoing. Please report issues with relevant OctoPrint logs, plugin versions, hardware revisions and firmware details.
 
 Repository
 
@@ -123,4 +128,4 @@ https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 
 **SpideRaY**
 
-Created to help save power and the planet.
+*Created to help save Power and the Planet.*
