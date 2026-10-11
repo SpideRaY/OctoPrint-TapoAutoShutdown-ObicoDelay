@@ -477,6 +477,7 @@ class TapoAutoShutdownPlugin(
 
             # OctoPi shutdown
             "octopi_shutdown_enabled": False,
+            "octopi_shutdown_delay": 15,
 
             # Obico
             "obico_monitor_delay": 60,
