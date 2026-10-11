@@ -2,7 +2,7 @@
 
 ## Version differences
 
-v0.2.0 — Original version
+**v0.2.0 — Original version**
 
 Provides automatic printer Tapo P110 shutdown and Obico AI monitoring management, with configurable delays.
 
@@ -10,7 +10,7 @@ Provides automatic printer Tapo P110 shutdown and Obico AI monitoring management
 * Provides a configurable printer shutdown delay.
 * Manages Obico AI failure detection around print jobs.
 
-v0.3.0 — Additional OctoPi shutdown control
+**v0.3.0 — Additional OctoPi shutdown control**
 
 Retains the existing printer shutdown and Obico AI features and adds improved control of a second Tapo P110 connected to the Raspberry Pi running OctoPrint.
 
