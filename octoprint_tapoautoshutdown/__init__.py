@@ -481,8 +481,6 @@ class TapoAutoShutdownPlugin(
 
             # OctoPi Tapo P110
             "octopi_tapo_enabled": False,
-            "octopi_tapo_username": "",
-            "octopi_tapo_password": "",
             "octopi_tapo_ip": "",
 
             # OctoPi shutdown
