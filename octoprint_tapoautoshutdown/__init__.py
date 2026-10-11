@@ -294,8 +294,8 @@ class TapoAutoShutdownPlugin(
 
     # Arm the OctoPi Tapo P110 shutdown timer
     async def _arm_octopi_tapo_timer(self):
-        username = self._settings.get(["octopi_tapo_username"])
-        password = self._settings.get(["octopi_tapo_password"])
+        username = self._settings.get(["username"])
+        password = self._settings.get(["password"])
         ip = self._settings.get(["octopi_tapo_ip"])
 
         if not username or not password or not ip:
@@ -383,8 +383,8 @@ class TapoAutoShutdownPlugin(
     
     # Clear the OctoPi plug timer if shutdown fails
     async def _clear_octopi_tapo_timer(self):
-        username = self._settings.get(["octopi_tapo_username"])
-        password = self._settings.get(["octopi_tapo_password"])
+        username = self._settings.get(["username"])
+        password = self._settings.get(["password"])
         ip = self._settings.get(["octopi_tapo_ip"])
 
         try:
