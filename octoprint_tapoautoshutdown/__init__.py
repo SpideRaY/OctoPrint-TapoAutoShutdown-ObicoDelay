@@ -311,8 +311,18 @@ class TapoAutoShutdownPlugin(
             client = ApiClient(username, password)
             plug = await client.p110(ip)
 
-            # Allow 15 minutes for Linux to shut down cleanly
-            await plug.set_timer(900, PowerState.Off)
+            # Allow the configured time for Linux to shut down cleanly
+            try:
+                delay_minutes = int(
+                    self._settings.get(["octopi_shutdown_delay"])
+                )
+                if not 1 <= delay_minutes <= 60:
+                    raise ValueError("Delay must be between 1 and 60 minutes")
+            except (TypeError, ValueError):
+                delay_minutes = 15
+
+            delay_seconds = delay_minutes * 60
+            await plug.set_timer(delay_seconds, PowerState.Off)
 
             # Verify the timer was accepted
             timer = await plug.get_timer()
