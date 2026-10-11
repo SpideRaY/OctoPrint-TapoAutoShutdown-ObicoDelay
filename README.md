@@ -32,11 +32,11 @@
 - Setting the Obico delay to 0 enables AI monitoring immediately.
 - Helps reduce unnecessary Obico AI-hour usage while the printer is idle or during the early part of a print.
 
-### Settings
+## Settings
 
 - The plugin provides the following configuration options in the OctoPrint settings interface.
 
-## Setting	Description
+### Setting	Description
 
 - Tapo account username	Username and Password for the Tapo account
 - Printer Tapo P110 IP address IP address of the 3D Printer's smart plug
