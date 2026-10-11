@@ -40,10 +40,11 @@
         <label class="checkbox">
             <input type="checkbox"
                 data-bind="checked: settings.plugins.tapoautoshutdown.octopi_tapo_enabled">
-            Enable OctoPi Tapo P110
+            Enable OctoPi Tapo
         </label>
         <p class="help-block">
-            Enable control of a second Tapo P110 that powers the Raspberry Pi running OctoPrint.
+            Enable control of a second Tapo that powers the Raspberry Pi running OctoPrint.
+            Leave unchecked if you only have the 3D printer Tapo connected.
         </p>
     </div>
 </div>
@@ -54,13 +55,11 @@
         <label class="checkbox">
             <input type="checkbox"
                 data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
-            Shut down OctoPi after successful timelapse rendering
+            Enable automatic OctoPi shutdown
         </label>
         <p class="help-block">
-            After a successful print and completed timelapse rendering,
-            request a clean OctoPi shutdown. The OctoPi Tapo P110 switches
-            off after the configured delay; this does not confirm that Linux
-            has finished shutting down.
+            Enable automatic shutdown of the Raspberry Pi after a successful print and completed timelapse rendering.
+            The configured Tapo smart plug will switch off after the specified delay.
         </p>
     </div>
 </div>
