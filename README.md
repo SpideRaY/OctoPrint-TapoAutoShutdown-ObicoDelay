@@ -1,6 +1,6 @@
 # **OctoPrint-TapoAutoShutdown v0.3.0**
 
-1. An OctoPrint plugin for automatically controlling TP-Link Tapo P110 smart plugs and managing Obico AI failure detection around your 3D prints.
+1. An OctoPrint plugin for automatically controlling TP-Link Tapo P110 smart plugs and managing Obico AI failure detection.
 2. The plugin provides independent shutdown control for your printer and the Raspberry Pi running OctoPrint.
 3. Configurable Obico AI monitoring delays to help reduce unnecessary AI-hour usage.
 
