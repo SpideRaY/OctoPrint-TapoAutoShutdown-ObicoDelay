@@ -2,21 +2,21 @@
 
 ## Version differences
 
-- Version 0.2.0 — Printer control and Obico AI ans provides automatic control of a Tapo P110 smart plug connected to the 3D printer, together with configurable Obico AI failure detection delays.
-- Version 0.3.0 — Builds on the existing printer control and Obico AI functionality by adding support for a second Tapo P110 to control power to the Raspberry Pi running OctoPrint. Additional OctoPi shutdown control
+- v0.2.0 — Printer control and Obico AI ans provides automatic control of a Tapo P110 smart plug connected to the 3D printer, together with configurable Obico AI failure detection delays.
+- v0.3.0 — Builds on the existing printer control and Obico AI functionality by adding support for a second Tapo P110 to control power to the Raspberry Pi running OctoPrint. Additional OctoPi shutdown control
 
-### Features include:
+### v0.2.0 Old Features include:
 
 * Automatic printer plug shutdown after a completed print.
 * Configurable printer shutdown delay.
 * Configurable Obico AI monitoring delay.
 * Automatic enabling and disabling of Obico AI monitoring based on print status.
 
-## Additional features include:
+## v0.3.0 New Features include:
 
 * Separate IP addresses for the printer and OctoPi smart plugs.
 * Shared Tapo account credentials for both plugs.
-* Independent printer and OctoPi shutdown settings.
+* Independent Printer and OctoPi shutdown settings.
 * Configurable delay before the OctoPi plug switches off.
 * Automatic OctoPi shutdown after a successful print and completed timelapse rendering.
 * Verification of the OctoPi plug’s power-off timer before requesting a clean Linux shutdown.
