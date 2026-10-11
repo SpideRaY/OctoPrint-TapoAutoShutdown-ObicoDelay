@@ -2,8 +2,8 @@
 
 ## Version differences
 
-#### v0.2.0 — Original version provides printer Tapo P110 shutdown control and Obico AI monitoring management. It also contains basic OctoPi shutdown functionality, using separate Tapo credentials and a one-second power-off timer.
-#### v0.3.0 — Improved OctoPi shutdown retains the printer shutdown and Obico AI features while improving the OctoPi shutdown sequence.
+#### v0.2.0 — Original version provides printer Tapo P110 shutdown control and Obico AI monitoring management.
+#### v0.3.0 — Improved OctoPi shutdown retains the printer shutdown and Obico AI features while improving the OctoPi shutdown sequence. It also contains basic OctoPi shutdown functionality, using separate Tapo credentials and a one-second power-off timer.
 
 * Uses shared Tapo account credentials for both plugs.
 * Maintains separate IP addresses for the printer and OctoPi plugs.
