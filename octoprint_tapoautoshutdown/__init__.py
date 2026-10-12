@@ -365,6 +365,76 @@ class TapoAutoShutdownPlugin(
                         clear_error,
                     )
             return False
+
+    # Arm the Ender Tapo P110 shutdown timer
+    async def _arm_ender_tapo_timer(self):
+        username = self._settings.get(["username"])
+        password = self._settings.get(["password"])
+        ip = self._settings.get(["ip"])
+
+        if not username or not password or not ip:
+            self._logger.error(
+                "Ender shutdown cancelled: Tapo credentials or IP are missing"
+            )
+            return False
+
+        plug = None
+
+        try:
+            client = ApiClient(username, password)
+            plug = await client.p110(ip)
+
+            try:
+                delay_minutes = int(
+                    self._settings.get(["tapo_shutdown_delay"])
+                )
+                if not 1 <= delay_minutes <= 60:
+                    raise ValueError("Delay must be between 1 and 60 minutes")
+            except (TypeError, ValueError):
+                delay_minutes = 5
+
+            delay_seconds = delay_minutes * 60
+            await plug.set_timer(delay_seconds, PowerState.Off)
+            timer = await plug.get_timer()
+
+        if (
+                timer is None
+                or timer.desired_state != PowerState.Off
+                or timer.remaining_s is None
+                or timer.remaining_s <= 0
+            ):
+                self._logger.error(
+                    "Ender shutdown cancelled: Tapo timer verification failed"
+                )
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear unverified Ender Tapo timer: %s",
+                        clear_error,
+                    )
+                return False
+
+            self._logger.info(
+                "Ender Tapo shutdown timer verified: power off in approximately %s seconds",
+                timer.remaining_s,
+            )
+            return True
+
+        except Exception as e:
+            self._logger.error(
+                "Failed to arm or verify Ender Tapo shutdown timer: %s",
+                e,
+            )
+            if plug is not None:
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear Ender Tapo timer after error: %s",
+                        clear_error,
+                    )
+            return False
     
     # Run the OctoPi shutdown sequence in the background
     def _octopi_shutdown_sequence(self):
