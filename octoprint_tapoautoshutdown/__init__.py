@@ -408,10 +408,10 @@ class TapoAutoShutdownPlugin(
                 )
                 try:
                     await plug.clear_timer()
-                    except Exception as clear_error:
+                except Exception as clear_error:
                     self._logger.error(
-                        "Could not clear unverified Ender Tapo timer: %s",
-                        clear_error,
+                    "Could not clear unverified Ender Tapo timer: %s",
+                    clear_error,
                     )
                     return False
 
