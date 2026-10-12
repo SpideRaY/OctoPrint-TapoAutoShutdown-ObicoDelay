@@ -500,48 +500,6 @@ class TapoAutoShutdownPlugin(
                 self._clear_octopi_tapo_timer()
             )
     
-    def _delayed_shutdown(self):
-
-        try:
-            delay_minutes = int(
-                self._settings.get(["tapo_shutdown_delay"])
-            )
-        except (TypeError, ValueError):
-            delay_minutes = 5
-
-        delay_seconds = delay_minutes * 60
-
-        self._logger.info(
-            "Waiting %s minutes before switching off the Tapo P110",
-            delay_minutes,
-        )
-
-        time.sleep(delay_seconds)
-
-        asyncio.run(self._switch_off())
-
-    async def _switch_off(self):
-
-        username = self._settings.get(["username"])
-        password = self._settings.get(["password"])
-        ip = self._settings.get(["ip"])
-
-        try:
-            client = ApiClient(username, password)
-            plug = await client.p110(ip)
-
-            await plug.off()
-
-            self._logger.info(
-                "Tapo P110 switched OFF successfully"
-            )
-
-        except Exception as e:
-            self._logger.error(
-                "Failed to switch off Tapo P110: %s",
-                e,
-            )
-
     def is_template_autoescaped(self):
         return True
          
