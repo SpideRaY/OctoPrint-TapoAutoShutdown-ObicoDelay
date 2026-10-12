@@ -435,6 +435,22 @@ class TapoAutoShutdownPlugin(
                         clear_error,
                     )
             return False
+
+    # Run the Ender shutdown timer in the background
+    def _arm_ender_tapo_timer_background(self):
+        try:
+            timer_armed = asyncio.run(
+                self._arm_ender_tapo_timer()
+            )
+            if not timer_armed:
+                self._logger.error(
+                    "Ender shutdown cancelled because the Tapo timer could not be armed"
+                )
+        except Exception as e:
+            self._logger.error(
+                "Failed to start Ender Tapo shutdown timer: %s",
+                e,
+            )
     
     # Run the OctoPi shutdown sequence in the background
     def _octopi_shutdown_sequence(self):
