@@ -27,7 +27,7 @@ Retains the existing printer shutdown and Obico AI features and adds improved co
 
 * Latest version retains the existing printer shutdown and Obico AI monitoring functionality while introducing the additional OctoPi plug controls.
 * To use automatic OctoPi shutdown, a second compatible Tapo P110 is required. 
-* Required to configure it's IP address separately from the printer plug.
+* Configure the OctoPi Tapo's IP address separately from the printer plug.
 * Both plugs will use the same Tapo account credentials from their application.
 * After upgrading, review the plugin settings and verify the configuration before enabling automatic OctoPi shutdown.
 
@@ -54,7 +54,7 @@ Retains the existing printer shutdown and Obico AI features and adds improved co
 ### Obico AI monitoring
 
 - Automatically disables Obico AI failure detection when a print starts.
--Provides a configurable delay before AI failure detection is enabled.
+- Provides a configurable delay before AI failure detection is enabled.
 - Enables AI monitoring after the selected delay if the print is still running.
 - Disables AI monitoring when a print completes, is cancelled, or fails.
 - Setting the Obico delay to 0 enables AI monitoring immediately.
