@@ -397,23 +397,23 @@ class TapoAutoShutdownPlugin(
             await plug.set_timer(delay_seconds, PowerState.Off)
             timer = await plug.get_timer()
 
-            if (
-                timer is None
-                or timer.desired_state != PowerState.Off
-                or timer.remaining_s is None
-                or timer.remaining_s <= 0
-            ):
+                if (
+                    timer is None
+                    or timer.desired_state != PowerState.Off
+                    or timer.remaining_s is None
+                    or timer.remaining_s <= 0
+                ):
                 self._logger.error(
                     "Ender shutdown cancelled: Tapo timer verification failed"
                 )
                 try:
                     await plug.clear_timer()
-                except Exception as clear_error:
+                    except Exception as clear_error:
                     self._logger.error(
                         "Could not clear unverified Ender Tapo timer: %s",
                         clear_error,
                     )
-                return False
+                    return False
 
             self._logger.info(
                 "Ender Tapo shutdown timer verified: power off in approximately %s seconds",
