@@ -99,7 +99,7 @@ class TapoAutoShutdownPlugin(
                     "Print completed - starting printer shutdown timer"
                 )
                 threading.Thread(
-                    target=self._delayed_shutdown,
+                    target=self._arm_ender_tapo_timer_background,
                     daemon=True,
                 ).start()
             else:
