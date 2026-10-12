@@ -413,7 +413,7 @@ class TapoAutoShutdownPlugin(
                     "Could not clear unverified Ender Tapo timer: %s",
                     clear_error,
                     )
-                    return False
+                return False
 
             self._logger.info(
                 "Ender Tapo shutdown timer verified: power off in approximately %s seconds",
