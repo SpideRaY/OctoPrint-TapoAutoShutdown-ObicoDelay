@@ -365,52 +365,6 @@ class TapoAutoShutdownPlugin(
                         clear_error,
                     )
             return False
-
-    # Read current power from the Ender Tapo P110 (read-only)
-    async def _read_ender_power(self):
-        username = self._settings.get(["username"])
-        password = self._settings.get(["password"])
-        ip = self._settings.get(["ip"])
-
-        if not username or not password or not ip:
-            self._logger.warning(
-                "Ender power reading skipped: Tapo credentials or IP are missing"
-            )
-            return None
-
-        try:
-            client = ApiClient(username, password)
-            plug = await client.p110(ip)
-            result = await plug.get_current_power()
-
-            # Log the returned object first so we can confirm the API fields.
-            self._logger.info(
-                "Ender Tapo current power response: %r",
-                result,
-            )
-
-            # Extract a numeric power value if the result exposes one.
-            for attribute in ("current_power", "power", "current_power_w"):
-                value = getattr(result, attribute, None)
-                if isinstance(value, (int, float)):
-                    self._logger.info(
-                        "Ender Tapo power reading: %.2f W",
-                        value,
-                    )
-                    return float(value)
-
-            self._logger.warning(
-                "Ender power response received, but its numeric field "
-                "is not yet recognised"
-            )
-            return None
-
-        except Exception as e:
-            self._logger.error(
-                "Failed to read Ender Tapo current power: %s",
-                e,
-            )
-            return None
     
     # Arm the Ender Tapo P110 shutdown timer
     async def _arm_ender_tapo_timer(self):
