@@ -397,7 +397,7 @@ class TapoAutoShutdownPlugin(
             await plug.set_timer(delay_seconds, PowerState.Off)
             timer = await plug.get_timer()
 
-        if (
+            if (
                 timer is None
                 or timer.desired_state != PowerState.Off
                 or timer.remaining_s is None
