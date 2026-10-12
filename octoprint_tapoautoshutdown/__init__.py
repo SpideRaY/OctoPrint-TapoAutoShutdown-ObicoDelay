@@ -434,7 +434,7 @@ class TapoAutoShutdownPlugin(
                         "Could not clear Ender Tapo timer after error: %s",
                         clear_error,
                     )
-            return False
+                return False
 
     # Run the Ender shutdown timer in the background
     def _arm_ender_tapo_timer_background(self):
