@@ -1,10 +1,15 @@
 import asyncio
 import threading
 import time
+from importlib.metadata import version
 
 import octoprint.plugin
+from octoprint.systemcommands import system_command_manager
 from tapo import ApiClient
+from tapo.responses import PowerState
 import octoprint_obico
+
+__plugin_version__ = version("OctoPrint-TapoAutoShutdown")
 
 class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
@@ -16,6 +21,10 @@ class TapoAutoShutdownPlugin(
     def __init__(self):
         self._obico_timer = None
         self._obico_timer_lock = threading.Lock()
+        self._successful_print = False
+        self._timelapse_done = False
+        self._timelapse_failed = False
+        self._octopi_shutdown_started = False
 
     def on_after_startup(self):
         self._logger.info("Tapo Auto Shutdown started")
@@ -51,30 +60,105 @@ class TapoAutoShutdownPlugin(
 
     def on_event(self, event, payload):
 
-        # Start Obico countdown when a print starts
+        # Start a new print and reset the event flags
         if event == "PrintStarted":
+            self._successful_print = False
+            self._timelapse_done = False
+            self._timelapse_failed = False
+            self._octopi_shutdown_started = False
             self._disable_obico_monitoring()
             self._start_obico_timer()
+           
+        # Record successful timelapse rendering
+        elif event == "MovieDone":
+            self._timelapse_done = True
+            self._logger.info(
+                "Timelapse rendering completed successfully"
+            )
+            self._maybe_start_octopi_shutdown()
 
-        # Cancel the Obico countdown if the print ends
-        elif event in (
-            "PrintDone",
-            "PrintCancelled",
-            "PrintFailed",
-        ):
+        # Record failed timelapse rendering
+        elif event == "MovieFailed":
+            self._timelapse_failed = True
+            self._logger.error(
+                "Timelapse rendering failed - automatic OctoPi shutdown cancelled"
+            )    
+        # Handle a successfully completed print
+        elif event == "PrintDone":
+            self._successful_print = True
             self._cancel_obico_timer()
             self._disable_obico_monitoring()
 
-            # Existing Tapo shutdown behaviour
-            if event == "PrintDone":
-                self._logger.info(
-                    "Print completed - starting shutdown timer"
-                )
+            # Start printer shutdown independently
+            username = self._settings.get(["username"])
+            password = self._settings.get(["password"])
+            ip = self._settings.get(["ip"])
 
+            if username and password and ip:
+                self._logger.info(
+                    "Print completed - starting printer shutdown timer"
+                )
                 threading.Thread(
-                    target=self._delayed_shutdown,
+                    target=self._arm_ender_tapo_timer_background,
                     daemon=True,
                 ).start()
+            else:
+                self._logger.info(
+                    "Printer shutdown skipped - Tapo credentials or IP missing"
+                )
+
+            # Check whether OctoPi shutdown should proceed
+            if (
+                self._settings.get(["octopi_shutdown_enabled"])
+                and self._settings.get(["octopi_tapo_enabled"])
+            ):
+                self._logger.info(
+                    "Print completed - waiting for timelapse rendering"
+                )
+                self._maybe_start_octopi_shutdown()
+        
+
+        # Cancel Obico countdown if the print is cancelled or fails
+        elif event in ("PrintCancelled", "PrintFailed"):
+            self._successful_print = False
+            self._timelapse_done = False
+            self._timelapse_failed = False
+            self._cancel_obico_timer()
+            self._disable_obico_monitoring()
+
+    def _maybe_start_octopi_shutdown(self):
+        if self._octopi_shutdown_started:
+            return
+        if not self._successful_print:
+            return
+
+        if self._timelapse_failed:
+            self._logger.error(
+                "OctoPi shutdown cancelled because timelapse rendering failed"
+            )
+            return
+
+        if not self._timelapse_done:
+            self._logger.info(
+                "Waiting for timelapse rendering to finish"
+            )
+            return
+
+        if not (
+            self._settings.get(["octopi_shutdown_enabled"])
+            and self._settings.get(["octopi_tapo_enabled"])
+        ):
+            return
+
+        self._octopi_shutdown_started = True
+        self._logger.info(
+            "Print and timelapse complete - starting OctoPi shutdown sequence"
+        )
+
+        threading.Thread(
+            target=self._octopi_shutdown_sequence,
+            daemon=True,
+        ).start()
 
     def _start_obico_timer(self):
         self._cancel_obico_timer()
@@ -208,48 +292,217 @@ class TapoAutoShutdownPlugin(
                 "Failed to disable Obico AI monitoring: %s", e
             )
 
-    def _delayed_shutdown(self):
-
-        try:
-            delay_minutes = int(
-                self._settings.get(["tapo_shutdown_delay"])
-            )
-        except (TypeError, ValueError):
-            delay_minutes = 5
-
-        delay_seconds = delay_minutes * 60
-
-        self._logger.info(
-            "Waiting %s minutes before switching off the Tapo P110",
-            delay_minutes,
-        )
-
-        time.sleep(delay_seconds)
-
-        asyncio.run(self._switch_off())
-
-    async def _switch_off(self):
-
+    # Arm the OctoPi Tapo P110 shutdown timer
+    async def _arm_octopi_tapo_timer(self):
         username = self._settings.get(["username"])
         password = self._settings.get(["password"])
-        ip = self._settings.get(["ip"])
+        ip = self._settings.get(["octopi_tapo_ip"])
+
+        if not username or not password or not ip:
+            self._logger.error(
+                "OctoPi shutdown cancelled: Tapo credentials or IP are missing"
+            )
+            return False
+            
+        client = None
+        plug = None
 
         try:
             client = ApiClient(username, password)
             plug = await client.p110(ip)
 
-            await plug.off()
+            # Allow the configured time for Linux to shut down cleanly
+            try:
+                delay_minutes = int(
+                    self._settings.get(["octopi_shutdown_delay"])
+                )
+                if not 1 <= delay_minutes <= 60:
+                    raise ValueError("Delay must be between 1 and 60 minutes")
+            except (TypeError, ValueError):
+                delay_minutes = 15
 
+            delay_seconds = delay_minutes * 60
+            await plug.set_timer(delay_seconds, PowerState.Off)
+
+            # Verify the timer was accepted
+            timer = await plug.get_timer()
+
+            if (
+                timer is None
+                or timer.desired_state != PowerState.Off
+                or timer.remaining_s is None
+                or timer.remaining_s <= 0
+            ):
+                self._logger.error(
+                    "OctoPi shutdown cancelled: Tapo timer verification failed"
+                )
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear unverified Tapo timer: %s",
+                        clear_error,
+                    )
+                return False
             self._logger.info(
-                "Tapo P110 switched OFF successfully"
+                "OctoPi Tapo shutdown timer verified: power off in approximately "
+                "%s seconds",
+                timer.remaining_s,
             )
+            return True
 
         except Exception as e:
             self._logger.error(
-                "Failed to switch off Tapo P110: %s",
+                "Failed to arm or verify OctoPi Tapo shutdown timer: %s",
+                e,
+            )
+            if plug is not None:
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear Tapo timer after error: %s",
+                        clear_error,
+                    )
+            return False
+    
+    # Arm the Ender Tapo P110 shutdown timer
+    async def _arm_ender_tapo_timer(self):
+        username = self._settings.get(["username"])
+        password = self._settings.get(["password"])
+        ip = self._settings.get(["ip"])
+
+        if not username or not password or not ip:
+            self._logger.error(
+                "Ender shutdown cancelled: Tapo credentials or IP are missing"
+            )
+            return False
+
+        plug = None
+
+        try:
+            client = ApiClient(username, password)
+            plug = await client.p110(ip)
+
+            try:
+                delay_minutes = int(
+                    self._settings.get(["tapo_shutdown_delay"])
+                )
+                if not 1 <= delay_minutes <= 60:
+                    raise ValueError("Delay must be between 1 and 60 minutes")
+            except (TypeError, ValueError):
+                delay_minutes = 5
+
+            delay_seconds = delay_minutes * 60
+            await plug.set_timer(delay_seconds, PowerState.Off)
+            timer = await plug.get_timer()
+
+            if (
+                timer is None
+                or timer.desired_state != PowerState.Off
+                or timer.remaining_s is None
+                or timer.remaining_s <= 0
+                ):
+                self._logger.error(
+                    "Ender shutdown cancelled: Tapo timer verification failed"
+                )
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                    "Could not clear unverified Ender Tapo timer: %s",
+                    clear_error,
+                    )
+                return False
+
+            self._logger.info(
+                "Ender Tapo shutdown timer verified: power off in approximately %s seconds",
+                timer.remaining_s,
+            )
+            return True
+
+        except Exception as e:
+            self._logger.error(
+                "Failed to arm or verify Ender Tapo shutdown timer: %s",
+                e,
+            )
+            if plug is not None:
+                try:
+                    await plug.clear_timer()
+                except Exception as clear_error:
+                    self._logger.error(
+                        "Could not clear Ender Tapo timer after error: %s",
+                        clear_error,
+                    )
+                return False
+
+    # Run the Ender shutdown timer in the background
+    def _arm_ender_tapo_timer_background(self):
+        try:
+            timer_armed = asyncio.run(
+                self._arm_ender_tapo_timer()
+            )
+            if not timer_armed:
+                self._logger.error(
+                    "Ender shutdown cancelled because the Tapo timer could not be armed"
+                )
+        except Exception as e:
+            self._logger.error(
+                "Failed to start Ender Tapo shutdown timer: %s",
+                e,
+            )
+    
+    # Run the OctoPi shutdown sequence in the background
+    def _octopi_shutdown_sequence(self):
+        timer_armed = asyncio.run(
+            self._arm_octopi_tapo_timer()
+        )
+
+        if timer_armed:
+            self._shutdown_octopi()
+        else:
+            self._logger.error(
+                "OctoPi shutdown cancelled because the Tapo timer could not be armed"
+            )
+    
+    # Clear the OctoPi plug timer if shutdown fails
+    async def _clear_octopi_tapo_timer(self):
+        username = self._settings.get(["username"])
+        password = self._settings.get(["password"])
+        ip = self._settings.get(["octopi_tapo_ip"])
+
+        try:
+            client = ApiClient(username, password)
+            plug = await client.p110(ip)
+            await plug.clear_timer()
+            self._logger.info(
+                "OctoPi Tapo shutdown timer cleared"
+            )
+        except Exception as e:
+            self._logger.error(
+                "Failed to clear OctoPi Tapo timer: %s",
                 e,
             )
 
+    # Request a clean shutdown of OctoPi
+    def _shutdown_octopi(self):
+        try:
+            self._logger.info(
+                "Requesting clean OctoPi shutdown"
+            )
+            system_command_manager().perform_system_shutdown()
+        except Exception as e:
+            self._logger.error(
+                "Failed to request OctoPi shutdown: %s",
+                e,
+            )
+            asyncio.run(
+                self._clear_octopi_tapo_timer()
+            )
+    
+    def is_template_autoescaped(self):
+        return True
+         
     def get_template_configs(self):
         return [
             {
@@ -259,20 +512,51 @@ class TapoAutoShutdownPlugin(
                 "custom_bindings": False,
             }
         ]
-
+        
     def get_settings_defaults(self):
         return {
+            # Printer Tapo P110
             "username": "",
             "password": "",
             "ip": "",
             "tapo_shutdown_delay": 5,
+
+            # OctoPi Tapo P110
+            "octopi_tapo_enabled": False,
+            "octopi_tapo_ip": "",
+
+            # OctoPi shutdown
+            "octopi_shutdown_enabled": False,
+            "octopi_shutdown_delay": 15,
+
+            # Obico
             "obico_monitor_delay": 60,
         }
-
+        
     def get_settings_version(self):
         return 1
-
-
+        
+    def get_update_information(self):
+        return {
+            "tapoautoshutdown": {
+                "displayName": "Tapo Auto Shutdown",
+                "displayVersion": __plugin_version__,
+                "type": "github_release",
+                "user": "SpideRaY",
+                "repo": "OctoPrint-TapoAutoShutdown-ObicoDelay",
+                "current": __plugin_version__,
+                "pip": "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/{target_version}.zip",
+            }
+        }
+        
 __plugin_name__ = "Tapo Auto Shutdown"
-__plugin_pythoncompat__ = ">=3.9,<3.14"
-__plugin_implementation__ = TapoAutoShutdownPlugin()
+__plugin_pythoncompat__ = ">=3.11,<4"
+
+def __plugin_load__():
+    global __plugin_implementation__
+    __plugin_implementation__ = TapoAutoShutdownPlugin()
+
+    global __plugin_hooks__
+    __plugin_hooks__ = {
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
+    }

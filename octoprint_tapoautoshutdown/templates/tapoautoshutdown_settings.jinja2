@@ -1,5 +1,14 @@
 <div class="control-group">
-    <label class="control-label">Tapo P110 IP address</label>
+    <label class="control-label">OctoPi Tapo P110 IP address</label>
+    <div class="controls">
+        <input type="text"
+            class="input-block-level"
+            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_ip">
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Printer Tapo P110 IP address</label>
     <div class="controls">
         <input type="text"
             class="input-block-level"
@@ -8,7 +17,7 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Tapo username</label>
+    <label class="control-label">Tapo account username</label>
     <div class="controls">
         <input type="text"
             class="input-block-level"
@@ -17,7 +26,7 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Tapo password</label>
+    <label class="control-label">Tapo account password</label>
     <div class="controls">
         <input type="password"
             class="input-block-level"
@@ -26,16 +35,63 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Shutdown delay (minutes)</label>
+    <label class="control-label">OctoPi Tapo P110</label>
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox"
+                data-bind="checked: settings.plugins.tapoautoshutdown.octopi_tapo_enabled">
+            Enable OctoPi Tapo
+        </label>
+        <p class="help-block">
+            Enable control of a second Tapo that powers the Raspberry Pi running OctoPrint.
+            Leave unchecked if you only have the 3D printer Tapo connected.
+        </p>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Shut down OctoPi</label>
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox"
+                data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
+            Enable automatic OctoPi shutdown
+        </label>
+        <p class="help-block">
+            Enable automatic shutdown of the Raspberry Pi after a successful print and completed timelapse rendering.
+            The configured Tapo smart plug will switch off after the specified delay.
+        </p>
+    </div>
+</div>
+
+<div class="control-group">
+    <label class="control-label">Printer shutdown delay (minutes)</label>
     <div class="controls">
         <input type="number"
             class="input-block-level"
             data-bind="value: settings.plugins.tapoautoshutdown.tapo_shutdown_delay">
         	<p class="help-block">
-            	Time to wait after a completed print before switching the P110 off.
+            	Time to wait after a completed print before switching the Printer P110 off.
         	</p>
     </div>
 </div>
+
+<div class="control-group">
+    <label class="control-label">OctoPi shutdown delay (minutes)</label>
+    <div class="controls">
+        <input type="number"
+            class="input-block-level"
+            min="1"
+            max="60"
+            step="1"
+            data-bind="value: settings.plugins.tapoautoshutdown.octopi_shutdown_delay">
+       <p class="help-block">
+            Time to allow Linux to shut down before the OctoPi Tapo P110 switches off.
+            Default: 15 minutes. Allowed range: 1–60 minutes.
+        </p> 
+    </div>
+</div>
+
 
 <div class="control-group">
     <label class="control-label">Obico AI delay (minutes)</label>
