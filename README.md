@@ -144,7 +144,7 @@ https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 
 For the development branch, the URL is:
 
-[https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay-Dev]
+https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay-Dev
 
 ## Initial configuration and testing
 
