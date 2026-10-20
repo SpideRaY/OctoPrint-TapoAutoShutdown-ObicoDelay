@@ -142,11 +142,12 @@ The following configuration was used during development and testing of the OctoP
 
 https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 
-For the v0.3.0 development branch, the ZIP URL is:
+For the development branch, the URL is:
 
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/heads/v0.3.0.zip
+[https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay-Dev]
 
 ## Initial configuration and testing
+
 
 - Configure the printer plug IP address.
 - Configure the OctoPi plug IP address if using the second plug.
