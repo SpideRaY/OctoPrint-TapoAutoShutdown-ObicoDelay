@@ -904,7 +904,7 @@ class TapoAutoShutdownPlugin(
                                 actual,
                             )
                             self._send_ntfy_notification(
-                                f" ❄️ Ender 3 Pro bed reached 40°C (currently {actual:.1f}°C)."
+                                f" ❄️ Ender 3 Pro bed is at {actual:.1f}°C or below - you maybe able to remove your print."
                             )
 
                     if actual <= 32.0:
