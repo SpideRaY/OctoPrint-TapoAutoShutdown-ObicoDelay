@@ -933,7 +933,10 @@ class TapoAutoShutdownPlugin(
                             self._logger.info(
                                 "Sent one-time Tapo shutdown warning at %.1f C",
                                 actual,
-                            )    
+                            )
+                            self._send_ntfy_notification(
+                                f"⚠️ Ender 3 Pro bed is at {actual:.1f}°C — the printer's Tapo plug will switch off automatically when the bed reaches 30°C."
+                            )
 
             except Exception as e:
                 self._logger.warning(
