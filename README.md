@@ -42,16 +42,18 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Added warning boxes to tell the user to try to remove a print at 40°C+ a final reminder at 32°C
 * Added warning box to show that the printer has turned off at 30°C
 
-**v0.3.2.1 — Added ntfy push notifications (this is for Alex)**
+**v0.3.2.1 — Added ntfy push notifications (this is for Alex) and a separate TASD log**
 
+* Changed the settings layout so you only need to change the last part of each Tapo's IP address.
+* Added dedicated plugin_tapoautoshutdown.log for easier diagnosis of any potential Tapo communication errors.
 * Requires the free ntfy iOS/Android app and a unique subscribed topic for the user, download available @ https://ntfy.sh/
 * The free version without a paid account will allow 250 FREE notifications per day, plenty for OctoPrint with TASD plugin.
 * Sends a notification when the bed preheating command is issued, including the target temperature.
-* Sends a notification when the bed cools to 40°C, reminding the user that the print may be ready to remove.
-* Sends a final notification when the printer’s Tapo plug is switched off after the bed cools to 30°C.
+* Sends the first notification when the bed cools to 40°C, reminding the user that the print may be ready to remove.
+* Sends the second reminder notification when the bed cools to 32°C, indicating that printer's Tapo plug will switch off at 30°C.
+* Sends a final notification when the printer’s Tapo plug is switched off after the bed cools to 30°C. This usually takes at least 15 mins.
 * Notification delivery requires the Raspberry Pi to have network access.
 * Notification failures should not interrupt printer control or the shutdown sequence.
-* Added dedicated plugin_tapoautoshutdown.log for easier diagnosis of any potential Tapo communication errors.
 
 **Upgrading to the latest version**
 
@@ -65,8 +67,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 ### Printer Tapo P110
 
-- Automatically switches off the printer's Tapo P110 after a completed print.
-- Configurable printer shutdown delay in minutes.
+- Automatically switches off the printer's Tapo P110 after the bed has cooled to 30°C.
 - Uses a dedicated IP address for the printer's smart plug.
 - Controls the printer plug independently of the OctoPi plug.
 
@@ -87,8 +88,9 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 - Provides a configurable delay before AI failure detection is enabled.
 - Enables AI monitoring after the selected delay if the print is still running.
 - Disables AI monitoring when a print completes, is cancelled, or fails.
-- Setting the Obico delay to 0 enables AI monitoring immediately.
+- Setting the Obico delay to 0 enables AI monitoring immediately, as the print begins.
 - Helps reduce unnecessary Obico AI-hour usage while the printer is idle or during the early part of a print.
+- This makes sure that if you forget to turn it ON, after you've checked the first few layers before a long print.
 
 ### Plugin Settings
 
