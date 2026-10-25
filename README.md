@@ -51,7 +51,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Sends a final notification when the printer’s Tapo plug is switched off after the bed cools to 30°C.
 * Notification delivery requires the Raspberry Pi to have network access.
 * Notification failures should not interrupt printer control or the shutdown sequence.
-* Added dedicated plugin_tapoautoshutdown.log for easier diagnosis of errors.
+* Added dedicated plugin_tapoautoshutdown.log for easier diagnosis of any potential Tapo communication errors.
 
 **Upgrading to the latest version**
 
