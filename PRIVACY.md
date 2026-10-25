@@ -18,4 +18,4 @@ https://www.obico.io/blog/obico-privacy-data-security/
 Changes
 This privacy policy may be updated when the plugin's functionality changes.
 
-Last updated: 2026-09-12
+Last updated: 2026-10-25
