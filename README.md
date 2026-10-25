@@ -90,9 +90,13 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 - Setting the Obico delay to 0 enables AI monitoring immediately.
 - Helps reduce unnecessary Obico AI-hour usage while the printer is idle or during the early part of a print.
 
-## Settings
+### Plugin Settings
 
-The plugin provides the following configuration options in the OctoPrint settings interface.
+Configure Tapo, automatic bed preheating, OctoPi shutdown,
+Obico AI delay and ntfy notifications through the OctoPrint
+settings interface.
+
+![Tapo Auto Shutdown plugin settings](SETTINGS.png)
 
 ### Setting	Description
 
