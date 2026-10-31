@@ -1,6 +1,13 @@
 __pycache__/
-*.pyc
 *.egg-info/
-
 build/
+
+*.pyc
+*.swp
+.idea
+*.iml
+build
+dist
+*.egg*
+.DS_Store
 *.zip
