@@ -1068,7 +1068,7 @@ class TapoAutoShutdownPlugin(
 
             # ntfy push notifications
             # Preserve the currently configured topic when upgrading.
-            "ntfy_topic": "ender-alerts-a7k9m2p4x8q6",
+            "ntfy_topic": "",
 
             # Obico
             "obico_monitor_delay": 30,
