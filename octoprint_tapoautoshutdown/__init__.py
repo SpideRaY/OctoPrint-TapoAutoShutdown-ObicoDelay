@@ -1047,7 +1047,7 @@ class TapoAutoShutdownPlugin(
         """Preserve existing settings and safely update submitted values."""
 
         # Start with all existing settings, including defaults.
-        existing = self._settings.get([], merged=True) or {}
+        existing = self._settings.get_all_data(merged=True) or {}
         merged_data = dict(existing)
 
         # Apply only values actually submitted by the settings page.
