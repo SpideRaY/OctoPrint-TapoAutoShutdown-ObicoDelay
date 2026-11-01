@@ -1010,38 +1010,38 @@ class TapoAutoShutdownPlugin(
         ]
 
     def on_settings_initialized(self):
-    """Migrate legacy printer IP settings and populate final-octet fields."""
+        """Migrate legacy printer IP settings and populate final-octet fields."""
 
-    # Preserve settings from older versions.
-    if not self._settings.get(["printer_tapo_ip"]):
-        old_ip = self._settings.get(["ip"])
-        if old_ip:
-            self._settings.set(["printer_tapo_ip"], old_ip)
+        # Preserve settings from older versions.
+        if not self._settings.get(["printer_tapo_ip"]):
+            old_ip = self._settings.get(["ip"])
+            if old_ip:
+                self._settings.set(["printer_tapo_ip"], old_ip)
 
-    if not self._settings.get(["printer_tapo_ip_last_octet"]):
-        old_octet = self._settings.get(["ip_last_octet"])
-        if old_octet:
-            self._settings.set(["printer_tapo_ip_last_octet"], old_octet)
+        if not self._settings.get(["printer_tapo_ip_last_octet"]):
+            old_octet = self._settings.get(["ip_last_octet"])
+            if old_octet:
+                self._settings.set(["printer_tapo_ip_last_octet"], old_octet)
 
-    for ip_key, octet_key in (
-        ("printer_tapo_ip", "printer_tapo_ip_last_octet"),
-        ("octopi_tapo_ip", "octopi_tapo_ip_last_octet"),
-    ):
-        current_octet = (self._settings.get([octet_key]) or "").strip()
-        if current_octet:
-            continue
-
-        full_ip = (self._settings.get([ip_key]) or "").strip()
-        prefix = "192.168.1."
-
-        if full_ip.startswith(prefix):
-            tail = full_ip[len(prefix):].strip()
-            if tail.isdigit() and 1 <= int(tail) <= 254:
-                self._settings.set([octet_key], str(int(tail)))
+        for ip_key, octet_key in (
+            ("printer_tapo_ip", "printer_tapo_ip_last_octet"),
+            ("octopi_tapo_ip", "octopi_tapo_ip_last_octet"),
+        ):
+            current_octet = (self._settings.get([octet_key]) or "").strip()
+            if current_octet:
                 continue
 
-        if not full_ip:
-            self._settings.set([octet_key], "100")
+            full_ip = (self._settings.get([ip_key]) or "").strip()
+            prefix = "192.168.1."
+
+            if full_ip.startswith(prefix):
+                tail = full_ip[len(prefix):].strip()
+                if tail.isdigit() and 1 <= int(tail) <= 254:
+                    self._settings.set([octet_key], str(int(tail)))
+                    continue
+
+            if not full_ip:
+                self._settings.set([octet_key], "100")
 
     def on_settings_save(self, data):
         """Trim text settings, validate octets, and sync legacy full IPs."""
