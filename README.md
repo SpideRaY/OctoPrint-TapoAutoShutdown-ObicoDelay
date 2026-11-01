@@ -23,7 +23,7 @@ Retains the existing printer shutdown and Obico AI features and adds improved co
 
 *Important: The OctoPi shutdown feature is optional. The smart plug timer operates independently of Linux, so allow sufficient time for the Raspberry Pi to shut down cleanly before power is cut.*
 
-v0.3.0.1 — Made settings input blocks narrower for better compatibilty in all browsers
+**v0.3.0.1 — Made settings input blocks narrower for better compatibilty in all browsers**
 
 Important: The OctoPi shutdown feature is optional. The smart plug timer operates independently of Linux, so allow sufficient time for the Raspberry Pi to shut down cleanly before power is cut.
 
