@@ -44,6 +44,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.1 — Added ntfy push notifications (this is for Alex) and a separate TASD log**
 
+* Fixed the need to reboot OctoPrint so that the TASD plugin settings screen appears. After the v0.3.0.1 minor update.
 * Changed the settings layout so you only need to change the last part of each Tapo's IP address.
 * Added dedicated plugin_tapoautoshutdown.log for easier diagnosis of any potential Tapo communication errors.
 * Requires the free ntfy iOS/Android app and a unique subscribed topic for the user, download available @ https://ntfy.sh/
