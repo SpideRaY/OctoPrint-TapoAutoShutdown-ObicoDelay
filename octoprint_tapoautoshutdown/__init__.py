@@ -1076,7 +1076,7 @@ class TapoAutoShutdownPlugin(
             # Preserve the currently configured topic when upgrading.
             "ntfy_topic": "",
 
-            # Obico Delay
+            # Obico AI Monitoring Delay
             "obico_monitor_delay": 30,
         }
         
