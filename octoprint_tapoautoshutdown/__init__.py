@@ -1044,24 +1044,48 @@ class TapoAutoShutdownPlugin(
                 self._settings.set([octet_key], "100")
 
     def on_settings_save(self, data):
-        """Trim text settings, validate octets, and sync legacy full IPs."""
-        # Prevent accidental leading/trailing spaces in Tapo login and ntfy topic.
-        data["username"] = str(data.get("username", "") or "").strip()
-        data["ntfy_topic"] = str(data.get("ntfy_topic", "") or "").strip()
+        """Preserve existing settings and safely update submitted values."""
 
+        # Start with all existing settings, including defaults.
+        existing = self._settings.get([], merged=True) or {}
+        merged_data = dict(existing)
+
+        # Apply only values actually submitted by the settings page.
+        merged_data.update(data or {})
+
+        # Clean text fields without losing existing values.
+        if "username" in merged_data:
+            merged_data["username"] = str(
+                merged_data.get("username") or ""
+            ).strip()
+
+        if "ntfy_topic" in merged_data:
+            merged_data["ntfy_topic"] = str(
+                merged_data.get("ntfy_topic") or ""
+            ).strip()
+
+        # Validate IP addresses only when their octet field was submitted.
         for ip_key, octet_key in (
             ("printer_tapo_ip", "printer_tapo_ip_last_octet"),
             ("octopi_tapo_ip", "octopi_tapo_ip_last_octet"),
         ):
-            raw = str(data.get(octet_key, "") or "").strip()
-            if raw.isdigit() and 1 <= int(raw) <= 254:
-                data[octet_key] = str(int(raw))
-                data[ip_key] = "192.168.1." + str(int(raw))
-            else:
-                data[octet_key] = ""
-                data[ip_key] = ""
+            if octet_key not in (data or {}):
+                continue
 
-        octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+            raw = str(merged_data.get(octet_key) or "").strip()
+
+            if raw.isdigit() and 1 <= int(raw) <= 254:
+                octet = str(int(raw))
+                merged_data[octet_key] = octet
+                merged_data[ip_key] = "192.168.1." + octet
+            else:
+                merged_data[octet_key] = ""
+                merged_data[ip_key] = ""
+
+        # Save the complete merged settings dictionary.
+        octoprint.plugin.SettingsPlugin.on_settings_save(
+            self, merged_data
+       )
 
     def get_settings_defaults(self):
         return {
