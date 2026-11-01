@@ -1,4 +1,4 @@
-**OctoPrint-TapoAutoShutdown v0.3.2.2**
+***OctoPrint-TapoAutoShutdown v0.3.2.2**
 
 ## Version differences
 
