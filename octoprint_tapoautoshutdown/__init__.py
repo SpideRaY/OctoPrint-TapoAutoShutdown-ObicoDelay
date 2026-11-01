@@ -1048,6 +1048,8 @@ class TapoAutoShutdownPlugin(
                 data[octet_key] = ""
                 data[ip_key] = ""
 
+        octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+
     def get_settings_defaults(self):
         return {
             # Printer Tapo P110
