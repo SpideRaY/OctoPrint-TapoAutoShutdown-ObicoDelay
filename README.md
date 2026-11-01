@@ -170,8 +170,8 @@ The following configuration was used during development and testing of the OctoP
 1. Open OctoPrint in your browser
 2. Navigate to Settings → Plugin Manager.
 3. Select Get More….
-4. Search for the stable Tapo Autoshutdowm plugin release.
-5. OR enter the GitHub ZIP URL for the desired branch or release.
+4. Search for the stable Tapo Autoshutdown plugin release.
+5. OR enter the GitHub ZIP URL for the desired branch, not stable
 6. Install the plugin and allow OctoPrint to restart when prompted.
 7. Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
 
