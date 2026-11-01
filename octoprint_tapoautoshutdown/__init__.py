@@ -1012,7 +1012,7 @@ class TapoAutoShutdownPlugin(
     def on_settings_initialized(self):
         """Populate final-octet fields from existing full IP settings on upgrade."""
         for ip_key, octet_key in (
-            ("ip", "ip_last_octet"),
+            ("printer_tapo_ip", "ip_last_octet"),
             ("octopi_tapo_ip", "octopi_tapo_ip_last_octet"),
         ):
             current_octet = (self._settings.get([octet_key]) or "").strip()
@@ -1037,7 +1037,7 @@ class TapoAutoShutdownPlugin(
         data["ntfy_topic"] = str(data.get("ntfy_topic", "") or "").strip()
 
         for ip_key, octet_key in (
-            ("ip", "ip_last_octet"),
+            ("printer_tapo_ip", "printer_tapo_ip_last_octet"),
             ("octopi_tapo_ip", "octopi_tapo_ip_last_octet"),
         ):
             raw = str(data.get(octet_key, "") or "").strip()
