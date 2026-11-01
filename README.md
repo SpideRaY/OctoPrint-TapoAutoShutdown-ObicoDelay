@@ -201,7 +201,7 @@ https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/h
 
 Repository
 
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
+https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/
 
 ## Author
 
