@@ -177,9 +177,9 @@ The following configuration was used during development and testing of the OctoP
 
 https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 
-For the v0.3.2 development branch, the ZIP URL is:
+For the v0.3.2.2 branch, the ZIP URL is:
 
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/heads/v0.3.2.1.zip
+https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/heads/v0.3.2.2.zip
 
 ## Initial configuration and testing
 
