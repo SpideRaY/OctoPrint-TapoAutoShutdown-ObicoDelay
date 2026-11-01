@@ -1052,11 +1052,15 @@ class TapoAutoShutdownPlugin(
 
     def get_settings_defaults(self):
         return {
-            # Printer Tapo P110
+            # Tapo Account
             "username": "",
             "password": "",
-            "ip": "",
-            "ip_last_octet": "",
+            
+            # Printer Tapo P110
+            "printer_tapo_ip": "",
+            "printer_tapo_ip_last_octet": "",
+
+            # Bed Preheat 
             "bed_preheat_enabled": False,
 
             # OctoPi Tapo P110
@@ -1072,7 +1076,7 @@ class TapoAutoShutdownPlugin(
             # Preserve the currently configured topic when upgrading.
             "ntfy_topic": "",
 
-            # Obico
+            # Obico Delay
             "obico_monitor_delay": 30,
         }
         
