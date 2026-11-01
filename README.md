@@ -175,14 +175,6 @@ The following configuration was used during development and testing of the OctoP
 6. Install the plugin and allow OctoPrint to restart when prompted.
 7. Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
 
-## GitHub repository:
-
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
-
-For the v0.3.2.2 branch, the ZIP URL is:
-
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/heads/v0.3.2.2.zip
-
 ## Initial configuration and testing
 
 - Configure the printer plug IP address.
@@ -201,7 +193,7 @@ https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/h
 - The project aims to reduce unnecessary power consumption and Obico AI-hour usage while providing convenient, configurable smart-plug control for 3D printing.
 - Development and testing are ongoing. Please report issues with relevant OctoPrint logs, plugin versions, hardware revisions and firmware details.
 
-Repository
+## Github Repository
 
 https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/
 
