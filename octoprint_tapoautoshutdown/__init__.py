@@ -1091,6 +1091,7 @@ class TapoAutoShutdownPlugin(
         }
         
 __plugin_name__ = "Tapo Auto Shutdown"
+__plugin_identifier__ = "tapoautoshutdown"
 __plugin_pythoncompat__ = ">=3.11,<4"
 
 def __plugin_load__():
