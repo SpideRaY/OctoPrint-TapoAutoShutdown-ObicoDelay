@@ -1129,7 +1129,7 @@ class TapoAutoShutdownPlugin(
                 "user": "SpideRaY",
                 "repo": "OctoPrint-TapoAutoShutdown-ObicoDelay",
                 "current": __plugin_version__,
-                "pip": "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/{target_version}.zip",
+                "pip": "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/{target}.zip",
             }
         }
         
