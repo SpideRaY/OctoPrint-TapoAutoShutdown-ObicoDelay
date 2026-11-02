@@ -1119,6 +1119,7 @@ class TapoAutoShutdownPlugin(
         return 1
         
     def get_update_information(self):
+        """Provide release information for OctoPrint's Software Update plugin."""
         return {
             "tapoautoshutdown": {
                 "displayName": "Tapo Auto Shutdown",
