@@ -15,7 +15,14 @@ from tapo import ApiClient
 from tapo.responses import PowerState
 import octoprint_obico
 
+__plugin_name__ = "Tapo Auto Shutdown"
+__plugin_identifier__ = "tapoautoshutdown"
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
+__plugin_pythoncompat__ = ">=3.11,<4"
+__plugin_description__ = (
+    "Controls Tapo smart plugs for printer power management "
+    "and integrates Obico monitoring delays and notifications."
+)
 
 class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
@@ -41,6 +48,8 @@ class TapoAutoShutdownPlugin(
         self._bed_cooling_monitor_generation = 0      
         self._bed_40_notified = False
         self._bed_32_notified = False
+        # Throttle diagnostic power log entries without slowing power polling.
+        self._last_ender_power_log = 0.0
 
     def _send_ntfy_notification(self, message):
         """Send a push notification without disrupting printer control."""
@@ -108,7 +117,7 @@ class TapoAutoShutdownPlugin(
             self._logger.exception("Could not initialise dedicated Tapo Auto Shutdown log")
 
     def _diag(self, level, message, *args, **kwargs):
-        """Send diagnostics to both the normal OctoPrint log and plugin-only log."""
+        """Send diagnostics to the dedicated plugin log when available."""
         logger = getattr(self, "_tapo_file_logger", None)
         if logger is not None:
             getattr(logger, level)(message, *args, **kwargs)
@@ -716,10 +725,9 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._diag(
-                "warning",
-                "Ender power reading skipped: Tapo credentials or IP are missing"
-            )
+            message = "Ender power reading skipped: Tapo credentials or IP are missing"
+            self._logger.warning(message)
+            self._diag("warning", message)
             return None
 
         try:
@@ -727,37 +735,30 @@ class TapoAutoShutdownPlugin(
             plug = await client.p110(ip)
             result = await plug.get_current_power()
 
-            # Log the returned object first so we can confirm the API fields.
-            self._diag(
-                "info",
-                "Ender Tapo current power response: %r",
-                result,
-            )
-
-            # Extract a numeric power value if the result exposes one.
+            # Extract a numeric power value. Polling frequency and shutdown
+            # calculations remain unchanged; only the diagnostic log is throttled.
             for attribute in ("current_power", "power", "current_power_w"):
                 value = getattr(result, attribute, None)
                 if isinstance(value, (int, float)):
-                    self._diag(
-                        "info",
-                        "Ender Tapo power reading: %.2f W",
-                        value,
-                    )
+                    now = time.monotonic()
+                    if now - self._last_ender_power_log >= 10.0:
+                        self._diag("info", "Ender Tapo power reading: %.2f W", value)
+                        self._last_ender_power_log = now
                     return float(value)
 
-            self._diag("warning",(
+            message = (
                 "Ender power response received, but its numeric field "
                 "is not yet recognised"
             )
+            self._logger.warning(message)
+            self._diag("warning", message)
             return None
 
         except Exception as e:
-            self._diag("warning",(
-                "Failed to read Ender Tapo current power: %s",
-                e,
-            )
+            self._logger.error("Failed to read Ender Tapo current power: %s", e)
+            self._diag("exception", "Failed to read Ender Tapo current power: %s", e)
             return None
-    
+
     # Monitor the real bed temperature after a successful print.
     def _start_bed_cooling_monitor(self):
         with self._bed_cooling_monitor_lock:
@@ -1124,6 +1125,7 @@ class TapoAutoShutdownPlugin(
         return 1
         
     def get_update_information(self):
+        """Provide release information for OctoPrint's Software Update plugin."""
         return {
             "tapoautoshutdown": {
                 "displayName": "Tapo Auto Shutdown",
@@ -1134,11 +1136,7 @@ class TapoAutoShutdownPlugin(
                 "current": __plugin_version__,
                 "pip": "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/{target}.zip",
             }
-        }
-        
-__plugin_name__ = "Tapo Auto Shutdown"
-__plugin_identifier__ = "tapoautoshutdown"
-__plugin_pythoncompat__ = ">=3.11,<4"
+        }    
 
 def __plugin_load__():
     global __plugin_implementation__
