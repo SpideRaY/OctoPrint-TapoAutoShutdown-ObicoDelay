@@ -132,7 +132,8 @@ class TapoAutoShutdownPlugin(
                 obico_plugin = self._plugin_manager.get_plugin("obico", False)
                 if obico_plugin is not None:
 
-                    self._logger.info(
+                    self._diag(
+                        "info",
                         "Obico plugin detected - ready for integration"
                     )
                 else:

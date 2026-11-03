@@ -1,4 +1,4 @@
-# **OctoPrint-TapoAutoShutdown v0.3.2.2**
+# **OctoPrint-TapoAutoShutdown v0.3.2.3**
 
 ## Version differences
 
@@ -57,7 +57,17 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Sends a final notification when the printer’s Tapo plug is switched off after the bed cools to 30°C. This usually takes at least 15 mins.
 * Notification delivery requires the Raspberry Pi to have network access.
 * Notification failures should not interrupt printer control or the shutdown sequence.
+* There are currently four ntfy pushes at the same time that the windows appear in OctoPrint.
+* The most useful is the one when the bed reaches 40°C when you can try to remove your print (this is for Alex).
 
+<img src="images/SETTINGS_ntfy.png" width="300">
+
+**v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
+
+* INFO - DEBUG - WARNING tagged logs are now part of plug_autotaposhutdown.log for completion.
+* This makes it much easier to identify any possible TAPO plug communication problems.
+* Also throttled the Ender Tapo power readings to 10 seconds, to avoid the power readings from causing clutter.
+  
 **Upgrading to the latest version**
 
 * Latest version retains the existing printer shutdown and Obico AI monitoring functionality while introducing the additional OctoPi plug controls.
@@ -101,7 +111,7 @@ Configure Tapo, automatic bed preheating, OctoPi shutdown,
 Obico AI delay and ntfy notifications through the OctoPrint
 settings interface.
 
-![Tapo Auto Shutdown plugin settings](SETTINGS.png)
+<img src="images/SETTINGS.png" width="900">
 
 ### Setting	Description
 
