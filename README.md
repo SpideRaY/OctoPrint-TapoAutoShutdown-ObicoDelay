@@ -56,6 +56,8 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Notification delivery requires the Raspberry Pi to have network access.
 * Notification failures should not interrupt printer control or the shutdown sequence.
 
+ ![Tapo Auto Shutdown plugin settings](SETTINGS_ntfy.png)
+
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
 * INFO - DEBUG - WARNING logs are now part of plug_autotaposhutdown.log
@@ -181,10 +183,6 @@ The following configuration was used during development and testing of the OctoP
 ## GitHub repository:
 
 https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
-
-For the v0.3.2 development branch, the ZIP URL is:
-
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/refs/heads/v0.3.2.1.zip
 
 ## Initial configuration and testing
 
