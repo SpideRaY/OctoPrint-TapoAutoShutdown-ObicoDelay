@@ -716,7 +716,8 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._diag("warning",(
+            self._diag(
+                "warning",
                 "Ender power reading skipped: Tapo credentials or IP are missing"
             )
             return None
