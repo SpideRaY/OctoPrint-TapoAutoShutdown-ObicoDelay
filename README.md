@@ -64,10 +64,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * DEBUG - OctoPi timer: P110 device object obtained
 * WARNING - Ender power reading skipped: Tapo credentials or IP are missing
 * Also throttled the Ender Tapo power readings to 10 seconds
-* 
-
-
-
+  
 **Upgrading to the latest version**
 
 * Latest version retains the existing printer shutdown and Obico AI monitoring functionality while introducing the additional OctoPi plug controls.
