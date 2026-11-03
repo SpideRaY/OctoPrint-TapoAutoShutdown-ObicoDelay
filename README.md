@@ -62,8 +62,9 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
-* INFO - DEBUG - WARNING logs are now part of plug_autotaposhutdown.log
-* Also throttled the Ender Tapo power readings to 10 seconds
+* INFO - DEBUG - WARNING tagged logs are now part of plug_autotaposhutdown.log for completion.
+* This makes it much easier to identify any possible TAPO plug communication problems.
+* Also throttled the Ender Tapo power readings to 10 seconds, to avoid the power readings from causing clutter.
   
 **Upgrading to the latest version**
 
@@ -108,7 +109,7 @@ Configure Tapo, automatic bed preheating, OctoPi shutdown,
 Obico AI delay and ntfy notifications through the OctoPrint
 settings interface.
 
-![Tapo Auto Shutdown plugin settings](images/SETTINGS.png)
+<img src="images/SETTINGS.png" width="600">
 
 ### Setting	Description
 
