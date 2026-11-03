@@ -56,7 +56,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Notification delivery requires the Raspberry Pi to have network access.
 * Notification failures should not interrupt printer control or the shutdown sequence.
 
-<img src="images/SETTINGS_ntfy.png" width="400">
+<img src="images/SETTINGS_ntfy.png" width="300">
 
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
