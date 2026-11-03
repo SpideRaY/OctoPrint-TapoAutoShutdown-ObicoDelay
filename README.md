@@ -56,7 +56,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Notification delivery requires the Raspberry Pi to have network access.
 * Notification failures should not interrupt printer control or the shutdown sequence.
 
- ![Tapo Auto Shutdown plugin settings](SETTINGS_ntfy.png)
+ ![Tapo Auto Shutdown plugin settings](images/SETTINGS_ntfy.png)
 
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
@@ -106,7 +106,7 @@ Configure Tapo, automatic bed preheating, OctoPi shutdown,
 Obico AI delay and ntfy notifications through the OctoPrint
 settings interface.
 
-![Tapo Auto Shutdown plugin settings](SETTINGS.png)
+![Tapo Auto Shutdown plugin settings](images/SETTINGS.png)
 
 ### Setting	Description
 
