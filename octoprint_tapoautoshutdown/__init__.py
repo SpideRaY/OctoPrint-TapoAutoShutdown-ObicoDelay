@@ -728,7 +728,8 @@ class TapoAutoShutdownPlugin(
             result = await plug.get_current_power()
 
             # Log the returned object first so we can confirm the API fields.
-            self._logger.info(
+            self._diag(
+                "info",
                 "Ender Tapo current power response: %r",
                 result,
             )
@@ -737,7 +738,8 @@ class TapoAutoShutdownPlugin(
             for attribute in ("current_power", "power", "current_power_w"):
                 value = getattr(result, attribute, None)
                 if isinstance(value, (int, float)):
-                    self._logger.info(
+                    self._diag(
+                        "info",
                         "Ender Tapo power reading: %.2f W",
                         value,
                     )
