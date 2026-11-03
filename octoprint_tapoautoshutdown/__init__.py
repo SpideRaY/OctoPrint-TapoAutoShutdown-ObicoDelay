@@ -15,14 +15,7 @@ from tapo import ApiClient
 from tapo.responses import PowerState
 import octoprint_obico
 
-__plugin_name__ = "Tapo Auto Shutdown"
-__plugin_identifier__ = "tapoautoshutdown"
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
-__plugin_pythoncompat__ = ">=3.11,<4"
-__plugin_description__ = (
-    "Controls Tapo smart plugs for printer power management "
-    "and integrates Obico monitoring delays and notifications."
-)
 
 class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
@@ -1129,7 +1122,6 @@ class TapoAutoShutdownPlugin(
         return 1
         
     def get_update_information(self):
-        """Provide release information for OctoPrint's Software Update plugin."""
         return {
             "tapoautoshutdown": {
                 "displayName": "Tapo Auto Shutdown",
@@ -1140,7 +1132,11 @@ class TapoAutoShutdownPlugin(
                 "current": __plugin_version__,
                 "pip": "https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/archive/{target}.zip",
             }
-        }    
+        }
+        
+__plugin_name__ = "Tapo Auto Shutdown"
+__plugin_identifier__ = "tapoautoshutdown"
+__plugin_pythoncompat__ = ">=3.11,<4"
 
 def __plugin_load__():
     global __plugin_implementation__
