@@ -58,11 +58,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
-* INFO - Dedicated Tapo Auto Shutdown log initialised
-* INFO - Tapo Auto Shutdown started
-* INFO - Obico plugin detected - ready for integration
-* DEBUG - OctoPi timer: P110 device object obtained
-* WARNING - Ender power reading skipped: Tapo credentials or IP are missing
+* INFO - DEBUG - WARNING logs are now part of plug_autotaposhutdown.log
 * Also throttled the Ender Tapo power readings to 10 seconds
   
 **Upgrading to the latest version**
