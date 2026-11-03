@@ -190,11 +190,13 @@ class TapoAutoShutdownPlugin(
                     consecutive_high = 0
 
                     if self._printer.is_operational():
-                        self._logger.info(
+                        self._diag(
+                            "info",
                             "Ender power is above 8 W, but printer is already connected"
                         )
                     else:
-                        self._logger.info(
+                        self._diag(
+                            "info",
                             "Ender power is above 8 W for three readings - requesting printer connection"
                         )
                         self._printer.connect()
