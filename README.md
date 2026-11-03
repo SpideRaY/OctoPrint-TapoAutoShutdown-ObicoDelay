@@ -109,7 +109,7 @@ Configure Tapo, automatic bed preheating, OctoPi shutdown,
 Obico AI delay and ntfy notifications through the OctoPrint
 settings interface.
 
-<img src="images/SETTINGS.png" width="600">
+<img src="images/SETTINGS.png" width="900">
 
 ### Setting	Description
 
