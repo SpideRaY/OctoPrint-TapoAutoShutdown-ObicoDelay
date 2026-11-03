@@ -21,7 +21,9 @@ Retains the existing printer shutdown and Obico AI features and adds improved co
 * Verifies the power-off timer before requesting a clean Linux shutdown.
 * Attempts to clear the timer if the shutdown request fails.
 
-*Important: The OctoPi shutdown feature is optional. The smart plug timer operates independently of Linux, so allow sufficient time for the Raspberry Pi to shut down cleanly before power is cut.*
+**v0.3.0.1 — Made settings input blocks narrower for better compatibilty in all browsers**
+
+Important: The OctoPi shutdown feature is optional. The smart plug timer operates independently of Linux, so allow sufficient time for the Raspberry Pi to shut down cleanly before power is cut.
 
 **v0.3.1 — Automatic printer connection**
 
@@ -42,7 +44,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Added warning boxes to tell the user to try to remove a print at 40°C+ a final reminder at 32°C
 * Added warning box to show that the printer has turned off at 30°C
 
-**v0.3.2.2 — Added ntfy push notifications and a separate TASD log**
+**v0.3.2.2 — Added ntfy push notifications (this is for Alex) and a separate TASD log**
 
 * Fixed the need to reboot OctoPrint so that the TASD plugin settings screen appears. After the v0.3.0.1 minor update.
 * Changed the settings layout so you only need to change the last part of each Tapo's IP address.
@@ -178,14 +180,10 @@ The following configuration was used during development and testing of the OctoP
 1. Open OctoPrint in your browser
 2. Navigate to Settings → Plugin Manager.
 3. Select Get More….
-4. Use the option to install a plugin from a URL.
-5. Enter the GitHub ZIP URL for the desired branch or release.
+4. Search for the stable Tapo Autoshutdown plugin release.
+5. OR enter the GitHub ZIP URL for the desired branch, not stable
 6. Install the plugin and allow OctoPrint to restart when prompted.
 7. Open the plugin settings and configure the smart plug IP addresses and shared Tapo account credentials.
-
-## GitHub repository:
-
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 
 ## Initial configuration and testing
 
@@ -205,9 +203,9 @@ https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
 - The project aims to reduce unnecessary power consumption and Obico AI-hour usage while providing convenient, configurable smart-plug control for 3D printing.
 - Development and testing are ongoing. Please report issues with relevant OctoPrint logs, plugin versions, hardware revisions and firmware details.
 
-Repository
+## Github Repository
 
-https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay
+https://github.com/SpideRaY/OctoPrint-TapoAutoShutdown-ObicoDelay/
 
 ## Author
 
