@@ -44,7 +44,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Added warning boxes to tell the user to try to remove a print at 40°C+ a final reminder at 32°C
 * Added warning box to show that the printer has turned off at 30°C
 
-**v0.3.2.2 — Added ntfy push notifications (this is for Alex) and a separate TASD log**
+**v0.3.2.2 — Added ntfy push notifications and a separate TASD log**
 
 * Fixed the need to reboot OctoPrint so that the TASD plugin settings screen appears. After the v0.3.0.1 minor update.
 * Changed the settings layout so you only need to change the last part of each Tapo's IP address.
