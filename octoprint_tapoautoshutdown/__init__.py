@@ -199,7 +199,9 @@ class TapoAutoShutdownPlugin(
                     e,
                 )
 
-            time.sleep(1)
+            # Poll every 10 seconds to reduce unnecessary Tapo API requests.
+            # Three consecutive high readings are still required for connection.
+            time.sleep(10)
     
     def on_shutdown(self):
         self._cancel_obico_timer()
@@ -739,7 +741,7 @@ class TapoAutoShutdownPlugin(
 
             # Log the returned object first so we can confirm the API fields.
             self._diag(
-                "info",
+                "debug",
                 "Ender Tapo current power response: %r",
                 result,
             )
@@ -749,7 +751,7 @@ class TapoAutoShutdownPlugin(
                 value = getattr(result, attribute, None)
                 if isinstance(value, (int, float)):
                     self._diag(
-                        "info",
+                        "debug",
                         "Ender Tapo power reading: %.2f W",
                         value,
                     )
