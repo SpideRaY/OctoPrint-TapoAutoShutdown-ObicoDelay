@@ -70,10 +70,16 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.4 — Improved the dedicated plugin log warnings and added SoC monitoring for the Raspberry Pi**
 
-* Add SoC monitoring so that it will shut down the Pi in case the operating temp goes above a threshold due to possible fan failure.
+
 * WARNING - Ender power reading skipped: Tapo credentials or IP are missing now only shows once.
 * DEBUG - Ender Tapo current power response throttled to every 10 seconds
 * Added the empty ntfy topic warning in case you forget to add it.
+* Add SoC monitoring so that it will shut down the Pi in case the operating temp goes above a threshold due to possible fan failure.
+* Monitor the Pi's SoC temperature every 30 seconds.
+* Log every reading in our dedicated Tapo log. If the temperature reaches 80°C, log a warning.
+* If the next reading, 30 seconds later, is also 80°C or higher, request a clean Raspberry Pi shutdown.
+* Send an urgent ntfy notification when the shutdown is triggered.
+* If the temperature drops below 80°C before the second reading, the consecutive-reading counter resets.
 
 
 **Upgrading to the latest version**
