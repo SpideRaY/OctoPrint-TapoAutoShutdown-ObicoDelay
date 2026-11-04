@@ -67,6 +67,12 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * INFO - DEBUG - WARNING tagged logs are now part of plug_autotaposhutdown.log for completion.
 * This makes it much easier to identify any possible TAPO plug communication problems.
 * Also throttled the Ender Tapo power readings to 10 seconds, to avoid the power readings from causing clutter.
+
+**v0.3.2.4 — Made sure ALL the dedicated plugin warnings are moved from OctoPrint log**
+
+* WARNING - Ender power reading skipped: Tapo credentials or IP are missing now only shows once.
+* DEBUG - Ender Tapo current power response throttled to every 10 seconds
+* Added the empty ntfy topic warning, and check it's valid.
   
 **Upgrading to the latest version**
 
