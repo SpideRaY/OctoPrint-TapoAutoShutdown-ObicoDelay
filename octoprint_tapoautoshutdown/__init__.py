@@ -43,25 +43,40 @@ class TapoAutoShutdownPlugin(
         self._bed_32_notified = False
         # Prevent the missing-configuration warning being written every second.
         self._ender_power_config_warning_logged = False
+        # Track the current ntfy configuration problem so each state is logged once.
+        self._ntfy_config_warning_state = None
 
     def _send_ntfy_notification(self, message):
         """Send a push notification without disrupting printer control."""
         # Read the ntfy topic from OctoPrint settings so it can be changed
         # in Settings without editing the Python source.
         topic = (self._settings.get(["ntfy_topic"]) or "").strip()
+
         if not topic:
-            self._logger.warning(
-                "ntfy notification skipped because no topic is configured"
-            )
+            if self._ntfy_config_warning_state != "missing":
+                self._diag(
+                    "warning",
+                    "ntfy notification unavailable: topic is missing. "
+                    "Enter your ntfy topic in the plugin settings."
+                )
+                self._ntfy_config_warning_state = "missing"
             return
 
         # Treat the topic as a single path component; don't allow a pasted URL
-        # or slash to change the destination.
+        # or slash/whitespace to change the destination.
         if "/" in topic or any(ch.isspace() for ch in topic):
-            self._logger.warning(
-                "ntfy notification skipped because the configured topic is invalid"
-            )
+            if self._ntfy_config_warning_state != "invalid":
+                self._diag(
+                    "warning",
+                    "ntfy notification unavailable: topic is invalid. "
+                    "Enter only the topic name, not a URL; spaces and '/' are not allowed."
+                )
+                self._ntfy_config_warning_state = "invalid"
             return
+
+        # A valid configuration clears the warning state. A later problem
+        # will therefore be reported again if the setting becomes invalid.
+        self._ntfy_config_warning_state = None
 
         request = urllib.request.Request(
             f"https://ntfy.sh/{topic}",
@@ -72,11 +87,13 @@ class TapoAutoShutdownPlugin(
         try:
             with urllib.request.urlopen(request, timeout=5) as response:
                 if response.status < 200 or response.status >= 300:
-                    self._logger.warning(
-                        "ntfy notification returned HTTP status %s", response.status
+                    self._diag(
+                        "warning",
+                        "ntfy notification failed: server returned HTTP status %s",
+                        response.status,
                     )
         except Exception as e:
-            self._logger.warning("Could not send ntfy notification: %s", e)
+            self._diag("warning", "ntfy notification could not be sent: %s", e)
 
     def _init_dedicated_logger(self):
         """Write plugin-only diagnostics to OctoPrint's Logs directory."""
