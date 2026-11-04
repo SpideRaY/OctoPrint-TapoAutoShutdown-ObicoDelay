@@ -41,6 +41,8 @@ class TapoAutoShutdownPlugin(
         self._bed_cooling_monitor_generation = 0      
         self._bed_40_notified = False
         self._bed_32_notified = False
+        # Prevent the missing-configuration warning being written every second.
+        self._ender_power_config_warning_logged = False
 
     def _send_ntfy_notification(self, message):
         """Send a push notification without disrupting printer control."""
@@ -108,7 +110,7 @@ class TapoAutoShutdownPlugin(
             self._logger.exception("Could not initialise dedicated Tapo Auto Shutdown log")
 
     def _diag(self, level, message, *args, **kwargs):
-        """Send diagnostics to both the normal OctoPrint log and plugin-only log."""
+        """Send diagnostics to the dedicated plugin-only log."""
         logger = getattr(self, "_tapo_file_logger", None)
         if logger is not None:
             getattr(logger, level)(message, *args, **kwargs)
@@ -717,10 +719,18 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._logger.warning(
-                "Ender power reading skipped: Tapo credentials or IP are missing"
-            )
+            # Log this once to the dedicated plugin log, not OctoPrint's main log.
+            if not self._ender_power_config_warning_logged:
+                self._diag(
+                    "warning",
+                    "Ender power reading skipped: Tapo credentials or IP are missing"
+                )
+                self._ender_power_config_warning_logged = True
             return None
+
+        # If settings have been restored, allow a future missing-settings
+        # condition to be recorded once again.
+        self._ender_power_config_warning_logged = False
 
         try:
             client = ApiClient(username, password)
