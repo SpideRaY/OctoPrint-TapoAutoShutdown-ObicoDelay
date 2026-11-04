@@ -43,6 +43,8 @@ class TapoAutoShutdownPlugin(
         self._bed_32_notified = False
         # Prevent the missing-configuration warning being written every second.
         self._ender_power_config_warning_logged = False
+        # Throttle successful Ender power diagnostics independently of polling.
+        self._ender_power_last_log_time = 0.0
         # Track the current ntfy configuration problem so each state is logged once.
         self._ntfy_config_warning_state = None
 
@@ -218,7 +220,7 @@ class TapoAutoShutdownPlugin(
 
             # Poll every 10 seconds to reduce unnecessary Tapo API requests.
             # Three consecutive high readings are still required for connection.
-            time.sleep(10)
+            time.sleep(1)
     
     def on_shutdown(self):
         self._cancel_obico_timer()
@@ -756,22 +758,25 @@ class TapoAutoShutdownPlugin(
             plug = await client.p110(ip)
             result = await plug.get_current_power()
 
-            # Log the returned object first so we can confirm the API fields.
-            self._diag(
-                "debug",
-                "Ender Tapo current power response: %r",
-                result,
-            )
-
             # Extract a numeric power value if the result exposes one.
+            # Polling remains every second; successful diagnostics are logged
+            # at most once every 10 seconds to keep the dedicated log concise.
             for attribute in ("current_power", "power", "current_power_w"):
                 value = getattr(result, attribute, None)
                 if isinstance(value, (int, float)):
-                    self._diag(
-                        "debug",
-                        "Ender Tapo power reading: %.2f W",
-                        value,
-                    )
+                    now = time.monotonic()
+                    if now - self._ender_power_last_log_time >= 10:
+                        self._diag(
+                            "debug",
+                            "Ender Tapo current power response: %r",
+                            result,
+                        )
+                        self._diag(
+                            "debug",
+                            "Ender Tapo power reading: %.2f W",
+                            value,
+                        )
+                        self._ender_power_last_log_time = now
                     return float(value)
 
             self._logger.warning(
