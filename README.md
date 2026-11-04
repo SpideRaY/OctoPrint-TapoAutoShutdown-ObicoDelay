@@ -72,7 +72,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 * WARNING - Ender power reading skipped: Tapo credentials or IP are missing now only shows once.
 * DEBUG - Ender Tapo current power response throttled to every 10 seconds
-* Added the empty ntfy topic warning in case you forget to add it.
+* WARNING - Added the empty ntfy topic in case you forget to add it.
 * Add SoC monitoring so that it will shutdown the Pi to provide additional thermal protection to the built in Pi monitoring.
 * Monitor the Pi's SoC temperature every 30 seconds. The plugin warning threshold is set to 60°C, log a warning.
 * Log every SoC reading in our dedicated Tapo log, normal operating temp 30–40°C
