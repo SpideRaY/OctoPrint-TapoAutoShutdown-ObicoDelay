@@ -17,6 +17,13 @@ import octoprint_obico
 
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
 
+# Raspberry Pi 4 thermal protection.
+# Trigger a clean Pi shutdown after two consecutive 30-second readings at/above 80 C.
+SOC_SHUTDOWN_THRESHOLD_C = 80.0
+SOC_SHUTDOWN_CONSECUTIVE_READINGS = 2
+SOC_MONITOR_INTERVAL_SECONDS = 30
+
+
 class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
     octoprint.plugin.EventHandlerPlugin,
@@ -182,8 +189,9 @@ class TapoAutoShutdownPlugin(
             ).start()
 
     def _monitor_soc_temperature(self):
-        """Log Raspberry Pi SoC temperature every 30 seconds."""
+        """Log Raspberry Pi SoC temperature and shut down if it overheats."""
         sensor_path = "/sys/class/thermal/thermal_zone0/temp"
+        high_temperature_readings = 0
 
         while True:
             try:
@@ -193,6 +201,25 @@ class TapoAutoShutdownPlugin(
                 # Linux reports this value in thousandths of a degree C.
                 temperature_c = int(raw_temperature) / 1000.0
                 self._diag("info", "SoC temperature: %.1f°C", temperature_c)
+
+                if temperature_c >= SOC_SHUTDOWN_THRESHOLD_C:
+                    high_temperature_readings += 1
+                    self._diag(
+                        "warning",
+                        "SoC temperature is high: %.1f°C (threshold %.1f°C; "
+                        "confirmation %d/%d)",
+                        temperature_c,
+                        SOC_SHUTDOWN_THRESHOLD_C,
+                        high_temperature_readings,
+                        SOC_SHUTDOWN_CONSECUTIVE_READINGS,
+                    )
+
+                    if high_temperature_readings >= SOC_SHUTDOWN_CONSECUTIVE_READINGS:
+                        self._emergency_soc_shutdown(temperature_c)
+                        return
+                else:
+                    # A reading below the limit breaks the consecutive sequence.
+                    high_temperature_readings = 0
 
             except (OSError, ValueError) as exc:
                 self._diag(
@@ -208,7 +235,43 @@ class TapoAutoShutdownPlugin(
                     exc,
                 )
 
-            time.sleep(30)
+            time.sleep(SOC_MONITOR_INTERVAL_SECONDS)
+
+    def _emergency_soc_shutdown(self, temperature_c):
+        """Request a clean Raspberry Pi shutdown after sustained SoC overheating."""
+        self._diag(
+            "critical",
+            "EMERGENCY: SoC temperature reached %.1f°C for %d consecutive "
+            "readings (shutdown threshold %.1f°C). Requesting Raspberry Pi shutdown.",
+            temperature_c,
+            SOC_SHUTDOWN_CONSECUTIVE_READINGS,
+            SOC_SHUTDOWN_THRESHOLD_C,
+        )
+
+        try:
+            self._send_ntfy_notification(
+                "URGENT: Raspberry Pi SoC temperature reached "
+                f"{temperature_c:.1f}°C. The Pi is shutting down to protect itself."
+            )
+        except Exception as exc:
+            self._diag(
+                "warning",
+                "Could not send SoC over-temperature notification: %s",
+                exc,
+            )
+
+        try:
+            system_command_manager().perform_system_shutdown()
+            self._diag(
+                "critical",
+                "Emergency Raspberry Pi shutdown request submitted successfully.",
+            )
+        except Exception as exc:
+            self._diag(
+                "critical",
+                "EMERGENCY Raspberry Pi shutdown request FAILED: %s",
+                exc,
+            )
 
     def _monitor_ender_power_for_connection(self):
         """Monitor printer power and request one automatic connection."""
