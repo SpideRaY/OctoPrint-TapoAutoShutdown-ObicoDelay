@@ -1,4 +1,4 @@
-# **OctoPrint-TapoAutoShutdown v0.3.2.3**
+# **OctoPrint-TapoAutoShutdown v0.3.2.4**
 
 ## Version differences
 
@@ -68,12 +68,14 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * This makes it much easier to identify any possible TAPO plug communication problems.
 * Also throttled the Ender Tapo power readings to 10 seconds, to avoid the power readings from causing clutter.
 
-**v0.3.2.4 — Improved the dedicated plugin log warnings and moved the rest from OctoPrint log**
+**v0.3.2.4 — Improved the dedicated plugin log warnings and added SoC monitoring for the Raspberry Pi**
 
+* Add SoC monitoring so that it will shut down the Pi in case the operating temp goes above a threshold due to possible fan failure.
 * WARNING - Ender power reading skipped: Tapo credentials or IP are missing now only shows once.
 * DEBUG - Ender Tapo current power response throttled to every 10 seconds
-* Added the empty ntfy topic warning, and check it's valid.
-  
+* Added the empty ntfy topic warning in case you forget to add it.
+
+
 **Upgrading to the latest version**
 
 * Latest version retains the existing printer shutdown and Obico AI monitoring functionality while introducing the additional OctoPi plug controls.
