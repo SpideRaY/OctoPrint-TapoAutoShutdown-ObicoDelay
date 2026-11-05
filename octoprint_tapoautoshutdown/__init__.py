@@ -17,6 +17,15 @@ import octoprint_obico
 
 __plugin_version__ = version("OctoPrint-TapoAutoShutdown")
 
+# Raspberry Pi 4 thermal protection.
+# Show a persistent OctoPrint warning from 60 C and request a clean Pi
+# shutdown after two consecutive 10-second readings at/above 70 C.
+SOC_WARNING_THRESHOLD_C = 60.0
+SOC_SHUTDOWN_THRESHOLD_C = 70.0
+SOC_SHUTDOWN_CONSECUTIVE_READINGS = 2
+SOC_MONITOR_INTERVAL_SECONDS = 10
+
+
 class TapoAutoShutdownPlugin(
     octoprint.plugin.StartupPlugin,
     octoprint.plugin.EventHandlerPlugin,
@@ -41,25 +50,44 @@ class TapoAutoShutdownPlugin(
         self._bed_cooling_monitor_generation = 0      
         self._bed_40_notified = False
         self._bed_32_notified = False
+        # Prevent the missing-configuration warning being written every second.
+        self._ender_power_config_warning_logged = False
+        # Throttle successful Ender power diagnostics independently of polling.
+        self._ender_power_last_log_time = 0.0
+        # Track the current ntfy configuration problem so each state is logged once.
+        self._ntfy_config_warning_state = None
 
     def _send_ntfy_notification(self, message):
         """Send a push notification without disrupting printer control."""
         # Read the ntfy topic from OctoPrint settings so it can be changed
         # in Settings without editing the Python source.
         topic = (self._settings.get(["ntfy_topic"]) or "").strip()
+
         if not topic:
-            self._logger.warning(
-                "ntfy notification skipped because no topic is configured"
-            )
+            if self._ntfy_config_warning_state != "missing":
+                self._diag(
+                    "warning",
+                    "ntfy notification unavailable: topic is missing. "
+                    "Enter your ntfy topic in the plugin settings."
+                )
+                self._ntfy_config_warning_state = "missing"
             return
 
         # Treat the topic as a single path component; don't allow a pasted URL
-        # or slash to change the destination.
+        # or slash/whitespace to change the destination.
         if "/" in topic or any(ch.isspace() for ch in topic):
-            self._logger.warning(
-                "ntfy notification skipped because the configured topic is invalid"
-            )
+            if self._ntfy_config_warning_state != "invalid":
+                self._diag(
+                    "warning",
+                    "ntfy notification unavailable: topic is invalid. "
+                    "Enter only the topic name, not a URL; spaces and '/' are not allowed."
+                )
+                self._ntfy_config_warning_state = "invalid"
             return
+
+        # A valid configuration clears the warning state. A later problem
+        # will therefore be reported again if the setting becomes invalid.
+        self._ntfy_config_warning_state = None
 
         request = urllib.request.Request(
             f"https://ntfy.sh/{topic}",
@@ -70,11 +98,13 @@ class TapoAutoShutdownPlugin(
         try:
             with urllib.request.urlopen(request, timeout=5) as response:
                 if response.status < 200 or response.status >= 300:
-                    self._logger.warning(
-                        "ntfy notification returned HTTP status %s", response.status
+                    self._diag(
+                        "warning",
+                        "ntfy notification failed: server returned HTTP status %s",
+                        response.status,
                     )
         except Exception as e:
-            self._logger.warning("Could not send ntfy notification: %s", e)
+            self._diag("warning", "ntfy notification could not be sent: %s", e)
 
     def _init_dedicated_logger(self):
         """Write plugin-only diagnostics to OctoPrint's Logs directory."""
@@ -108,14 +138,13 @@ class TapoAutoShutdownPlugin(
             self._logger.exception("Could not initialise dedicated Tapo Auto Shutdown log")
 
     def _diag(self, level, message, *args, **kwargs):
-        """Send diagnostics to both the normal OctoPrint log and plugin-only log."""
+        """Send diagnostics to the dedicated plugin-only log."""
         logger = getattr(self, "_tapo_file_logger", None)
         if logger is not None:
             getattr(logger, level)(message, *args, **kwargs)
 
     def on_after_startup(self):
         self._init_dedicated_logger()
-        self._logger.info("Tapo Auto Shutdown started")
         self._diag("info", "Tapo Auto Shutdown started")
 
         def check_for_obico():
@@ -130,12 +159,12 @@ class TapoAutoShutdownPlugin(
                         "Obico plugin detected - ready for integration"
                     )
                 else:
-                    self._logger.warning(
+                    self._diag("warning", 
                         "Obico plugin not detected after startup"
                     )
 
             except Exception as e:
-                self._logger.error(
+                self._diag("error", 
                     "Could not query Obico plugin: %s",
                     e,
                 )
@@ -150,6 +179,148 @@ class TapoAutoShutdownPlugin(
             target=self._monitor_ender_power_for_connection,
             daemon=True,
         ).start()
+
+        # Start Raspberry Pi SoC temperature monitoring.
+        # The monitor displays an OctoPrint warning at 60°C and requests
+        # a clean shutdown after two consecutive readings at or above 70°C.
+        if not getattr(self, "_soc_temperature_thread_started", False):
+            self._soc_temperature_thread_started = True
+            threading.Thread(
+                target=self._monitor_soc_temperature,
+                daemon=True,
+                name="tapo-soc-temperature-monitor",
+            ).start()
+
+    def _monitor_soc_temperature(self):
+        """Log Raspberry Pi SoC temperature and shut down if it overheats."""
+        sensor_path = "/sys/class/thermal/thermal_zone0/temp"
+        high_temperature_readings = 0
+        temperature_warning_active = False
+
+        while True:
+            try:
+                with open(sensor_path, "r", encoding="ascii") as sensor:
+                    raw_temperature = sensor.read().strip()
+
+                # Linux reports this value in thousandths of a degree C.
+                temperature_c = int(raw_temperature) / 1000.0
+                self._diag("info", "SoC temperature: %.1f°C", temperature_c)
+
+                # Send one persistent browser warning when the Pi first reaches
+                # 60 C. The JavaScript view model removes it after cooling.
+                if temperature_c >= SOC_WARNING_THRESHOLD_C:
+                    if not temperature_warning_active:
+                        self._diag(
+                            "warning",
+                            "SoC temperature elevated: %.1f°C (warning threshold %.1f°C)",
+                            temperature_c,
+                            SOC_WARNING_THRESHOLD_C,
+                        )
+                        try:
+                            self._plugin_manager.send_plugin_message(
+                                "tapoautoshutdown",
+                                {
+                                    "type": "soc_temperature_elevated",
+                                    "temperature": round(temperature_c, 1),
+                                },
+                            )
+                            temperature_warning_active = True
+                        except Exception as exc:
+                            self._diag(
+                                "warning",
+                                "Could not display SoC temperature warning in OctoPrint: %s",
+                                exc,
+                            )
+                elif temperature_warning_active:
+                    try:
+                        self._plugin_manager.send_plugin_message(
+                            "tapoautoshutdown",
+                            {"type": "soc_temperature_normal"},
+                        )
+                        self._diag(
+                            "info",
+                            "SoC temperature returned below %.1f°C; cleared elevated warning",
+                            SOC_WARNING_THRESHOLD_C,
+                        )
+                        temperature_warning_active = False
+                    except Exception as exc:
+                        # Keep the state active so the clear message is retried.
+                        self._diag(
+                            "warning",
+                            "Could not clear SoC temperature warning in OctoPrint: %s",
+                            exc,
+                        )
+
+                if temperature_c >= SOC_SHUTDOWN_THRESHOLD_C:
+                    high_temperature_readings += 1
+                    self._diag(
+                        "warning",
+                        "SoC temperature is high: %.1f°C (threshold %.1f°C; "
+                        "confirmation %d/%d)",
+                        temperature_c,
+                        SOC_SHUTDOWN_THRESHOLD_C,
+                        high_temperature_readings,
+                        SOC_SHUTDOWN_CONSECUTIVE_READINGS,
+                    )
+
+                    if high_temperature_readings >= SOC_SHUTDOWN_CONSECUTIVE_READINGS:
+                        self._emergency_soc_shutdown(temperature_c)
+                        return
+                else:
+                    # A reading below the limit breaks the consecutive sequence.
+                    high_temperature_readings = 0
+
+            except (OSError, ValueError) as exc:
+                self._diag(
+                    "warning",
+                    "Could not read SoC temperature from %s: %s",
+                    sensor_path,
+                    exc,
+                )
+            except Exception as exc:
+                self._diag(
+                    "exception",
+                    "Unexpected error while reading SoC temperature: %s",
+                    exc,
+                )
+
+            time.sleep(SOC_MONITOR_INTERVAL_SECONDS)
+
+    def _emergency_soc_shutdown(self, temperature_c):
+        """Request a clean Raspberry Pi shutdown after sustained SoC overheating."""
+        self._diag(
+            "critical",
+            "EMERGENCY: SoC temperature reached %.1f°C for %d consecutive "
+            "readings (shutdown threshold %.1f°C). Requesting Raspberry Pi shutdown.",
+            temperature_c,
+            SOC_SHUTDOWN_CONSECUTIVE_READINGS,
+            SOC_SHUTDOWN_THRESHOLD_C,
+        )
+
+        try:
+            self._send_ntfy_notification(
+                "URGENT: Raspberry Pi SoC temperature reached "
+                f"{temperature_c:.1f}°C. The Pi is shutting down to protect itself."
+            )
+        except Exception as exc:
+            self._diag(
+                "warning",
+                "Could not send SoC over-temperature notification: %s",
+                exc,
+            )
+
+        try:
+            system_command_manager().perform_system_shutdown()
+            self._diag(
+                "critical",
+                "Emergency Raspberry Pi shutdown request submitted successfully.",
+            )
+        except Exception as exc:
+            self._diag(
+                "critical",
+                "EMERGENCY Raspberry Pi shutdown request FAILED: %s",
+                exc,
+            )
 
     def _monitor_ender_power_for_connection(self):
         """Monitor printer power and request one automatic connection."""
@@ -182,21 +353,23 @@ class TapoAutoShutdownPlugin(
                     consecutive_high = 0
 
                     if self._printer.is_operational():
-                        self._logger.info(
+                        self._diag("info", 
                             "Ender power is above 8 W, but printer is already connected"
                         )
                     else:
-                        self._logger.info(
+                        self._diag("info", 
                             "Ender power is above 8 W for three readings - requesting printer connection"
                         )
                         self._printer.connect()
 
             except Exception as e:
-                self._logger.error(
+                self._diag("error", 
                     "Automatic printer connection monitor error: %s",
                     e,
                 )
 
+            # Poll every second so printer power-on is detected promptly.
+            # Successful power diagnostics are throttled separately to 10 seconds.
             time.sleep(1)
     
     def on_shutdown(self):
@@ -227,7 +400,7 @@ class TapoAutoShutdownPlugin(
         # Record successful timelapse rendering
         elif event == "MovieDone":
             self._timelapse_done = True
-            self._logger.info(
+            self._diag("info", 
                 "Timelapse rendering completed successfully"
             )
             self._maybe_start_octopi_shutdown()
@@ -235,7 +408,7 @@ class TapoAutoShutdownPlugin(
         # Record failed timelapse rendering
         elif event == "MovieFailed":
             self._timelapse_failed = True
-            self._logger.error(
+            self._diag("error", 
                 "Timelapse rendering failed - automatic OctoPi shutdown cancelled"
             )    
         # Handle a successfully completed print
@@ -250,18 +423,18 @@ class TapoAutoShutdownPlugin(
             ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
 
             if username and password and ip:
-                self._logger.info(
+                self._diag("info", 
                     "Print completed - starting bed-cooling monitor"
                 )
                 self._start_bed_cooling_monitor()
             else:
-                self._logger.warning(
+                self._diag("warning", 
                     "Bed-cooling monitor not started: Tapo credentials or IP missing"
                 )
 
             # Check whether OctoPi shutdown should proceed
             if self._settings.get(["octopi_shutdown_enabled"]):
-                self._logger.info(
+                self._diag("info", 
                     "Print completed - waiting for timelapse rendering"
                 )
                 self._maybe_start_octopi_shutdown()
@@ -288,13 +461,13 @@ class TapoAutoShutdownPlugin(
 
         # Make sure the printer is connected and idle
         if not self._printer.is_operational():
-            self._logger.info(
+            self._diag("info", 
                 "Bed preheat skipped: printer is not operational"
             )
             return
 
         if self._printer.is_printing():
-            self._logger.info(
+            self._diag("info", 
                 "Bed preheat skipped: a print is already running"
             )
             return
@@ -310,13 +483,13 @@ class TapoAutoShutdownPlugin(
             info = asyncio.run(plug.get_device_info())
 
             if not info.device_on:
-                self._logger.info(
+                self._diag("info", 
                     "Bed preheat skipped: Ender Tapo is switched off"
                 )
                 return
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Bed preheat skipped: could not check Tapo state: %s",
                 e,
             )
@@ -340,7 +513,7 @@ class TapoAutoShutdownPlugin(
             self._send_ntfy_notification(
                 f" 🔥 Ender 3 Pro - Bed preheating set to {temperature:.0f}°C"
             )
-            self._logger.info(
+            self._diag("info", 
                 "Automatic bed preheat requested: %.1f C",
                 temperature,
             )
@@ -355,7 +528,7 @@ class TapoAutoShutdownPlugin(
             ).start()
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Failed to start automatic bed preheat: %s",
                 e,
             )
@@ -369,13 +542,13 @@ class TapoAutoShutdownPlugin(
             time.sleep(5)
 
             if not self._printer.is_operational():
-                self._logger.warning(
+                self._diag("warning", 
                     "Bed preheat monitor stopped: printer disconnected"
                 )
                 return
 
             if self._printer.is_printing():
-                self._logger.info(
+                self._diag("info", 
                     "Bed preheat monitor stopped: print started"
                 )
                 return
@@ -394,7 +567,7 @@ class TapoAutoShutdownPlugin(
                 )
 
                 if not isinstance(actual, (int, float)):
-                    self._logger.warning(
+                    self._diag("warning", 
                         "Bed preheat temperature unavailable; retrying"
                     )
                     continue
@@ -416,12 +589,14 @@ class TapoAutoShutdownPlugin(
                             self._send_ntfy_notification(
                                 f"✅ Ender 3 Pro - Bed preheated to {actual:.1f}°C."
                             )
-                            self._logger.info(
+                            self._diag(
+                                "info",
                                 "Bed reached print-ready temperature: %.1f C",
                                 actual,
                             )
                         else:
-                            self._logger.info(
+                            self._diag(
+                                "info",
                                 "Bed reached preheat preset %.1f C; "
                                 "Ready to print notification suppressed "
                                 "because the target is below 50 C",
@@ -430,12 +605,12 @@ class TapoAutoShutdownPlugin(
                     return
 
             except Exception as e:
-                self._logger.warning(
+                self._diag("warning", 
                     "Bed preheat monitor error; retrying: %s",
                     e,
                 )
 
-        self._logger.error(
+        self._diag("error", 
             "Bed preheat timed out after 30 minutes; target %.1f C not reached",
             target_temperature,
         )
@@ -462,13 +637,13 @@ class TapoAutoShutdownPlugin(
             return
 
         if self._timelapse_failed:
-            self._logger.error(
+            self._diag("error", 
                 "OctoPi shutdown cancelled because timelapse rendering failed"
             )
             return
 
         if not self._timelapse_done:
-            self._logger.info(
+            self._diag("info", 
                 "Waiting for timelapse rendering to finish"
             )
             return
@@ -477,13 +652,13 @@ class TapoAutoShutdownPlugin(
             return
 
         if not self._ender_plug_off:
-            self._logger.info(
+            self._diag("info", 
                 "Waiting for Ender plug to be confirmed off before starting OctoPi timer"
             )
             return
 
         self._octopi_shutdown_started = True
-        self._logger.info(
+        self._diag("info", 
             "Timelapse complete and Ender plug confirmed off - starting OctoPi shutdown sequence"
         )
 
@@ -502,7 +677,7 @@ class TapoAutoShutdownPlugin(
         except (TypeError, ValueError):
             delay_minutes = 60
 
-        self._logger.info(
+        self._diag("info", 
             "Obico AI monitoring timer started - %s minutes",
             delay_minutes,
         )
@@ -529,20 +704,20 @@ class TapoAutoShutdownPlugin(
         # Check that a print is actually still running
         try:
             if not self._printer.is_printing():
-                self._logger.info(
+                self._diag("info", 
                     "Obico timer expired but no print is active - "
                     "AI monitoring not enabled"
                 )
                 return
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Could not determine printer state: %s",
                 e,
             )
             return
 
-        self._logger.info(
+        self._diag("info", 
             "Obico timer expired - enabling AI monitoring"
         )
 
@@ -563,14 +738,14 @@ class TapoAutoShutdownPlugin(
             )
 
             if obico_module is None:
-                self._logger.warning(
+                self._diag("warning", 
                     "Obico plugin is not installed or enabled - "
                     "AI monitoring cannot be started"
                 )
                 return
             obico_plugin = getattr(obico_module, "__plugin_implementation__", None)
 
-            self._logger.info(
+            self._diag("info", 
                 "Obico plugin detected - ready to enable AI monitoring"
             )
 
@@ -583,17 +758,17 @@ class TapoAutoShutdownPlugin(
             )
 
             if response is not None and response.ok:
-                self._logger.info(
+                self._diag("info", 
                     "Obico AI monitoring enabled successfully"
                 )
             else:
-                self._logger.error(
+                self._diag("error", 
                     "Failed to enable Obico AI monitoring: HTTP %s",
                     response.status_code if response is not None else "no response",
                 )
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Failed to enable Obico AI monitoring: %s",
                 e,
             )
@@ -615,12 +790,12 @@ class TapoAutoShutdownPlugin(
             )
 
             if response is not None and response.ok:
-                self._logger.info("Obico AI monitoring disabled successfully")
+                self._diag("info", "Obico AI monitoring disabled successfully")
             else:
-                self._logger.error("Failed to disable Obico AI monitoring")
+                self._diag("error", "Failed to disable Obico AI monitoring")
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Failed to disable Obico AI monitoring: %s", e
             )
 
@@ -631,7 +806,7 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["octopi_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._logger.error(
+            self._diag("error", 
                 "OctoPi shutdown cancelled: Tapo credentials or IP are missing"
             )
             return False
@@ -673,19 +848,19 @@ class TapoAutoShutdownPlugin(
                 or timer.remaining_s is None
                 or timer.remaining_s <= 0
             ):
-                self._logger.error(
+                self._diag("error", 
                     "OctoPi shutdown cancelled: Tapo timer verification failed"
                 )
                 self._diag("error", "OctoPi timer verification failed: response=%r", timer)
                 try:
                     await plug.clear_timer()
                 except Exception as clear_error:
-                    self._logger.error(
+                    self._diag("error", 
                         "Could not clear unverified Tapo timer: %s",
                         clear_error,
                     )
                 return False
-            self._logger.info(
+            self._diag("info", 
                 "OctoPi Tapo shutdown timer verified: power off in approximately "
                 "%s seconds",
                 timer.remaining_s,
@@ -694,7 +869,7 @@ class TapoAutoShutdownPlugin(
             return True
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Failed to arm or verify OctoPi Tapo shutdown timer: %s",
                 e,
             )
@@ -703,7 +878,7 @@ class TapoAutoShutdownPlugin(
                 try:
                     await plug.clear_timer()
                 except Exception as clear_error:
-                    self._logger.error(
+                    self._diag("error", 
                         "Could not clear Tapo timer after error: %s",
                         clear_error,
                     )
@@ -717,42 +892,53 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._logger.warning(
-                "Ender power reading skipped: Tapo credentials or IP are missing"
-            )
+            # Log this once to the dedicated plugin log, not OctoPrint's main log.
+            if not self._ender_power_config_warning_logged:
+                self._diag(
+                    "warning",
+                    "Ender power reading skipped: Tapo credentials or IP are missing"
+                )
+                self._ender_power_config_warning_logged = True
             return None
+
+        # If settings have been restored, allow a future missing-settings
+        # condition to be recorded once again.
+        self._ender_power_config_warning_logged = False
 
         try:
             client = ApiClient(username, password)
             plug = await client.p110(ip)
             result = await plug.get_current_power()
 
-            # Log the returned object first so we can confirm the API fields.
-            self._diag(
-                "info",
-                "Ender Tapo current power response: %r",
-                result,
-            )
-
             # Extract a numeric power value if the result exposes one.
+            # Polling remains every second; successful diagnostics are logged
+            # at most once every 10 seconds to keep the dedicated log concise.
             for attribute in ("current_power", "power", "current_power_w"):
                 value = getattr(result, attribute, None)
                 if isinstance(value, (int, float)):
-                    self._diag(
-                        "info",
-                        "Ender Tapo power reading: %.2f W",
-                        value,
-                    )
+                    now = time.monotonic()
+                    if now - self._ender_power_last_log_time >= 10:
+                        self._diag(
+                            "debug",
+                            "Ender Tapo current power response: %r",
+                            result,
+                        )
+                        self._diag(
+                            "debug",
+                            "Ender Tapo power reading: %.2f W",
+                            value,
+                        )
+                        self._ender_power_last_log_time = now
                     return float(value)
 
-            self._logger.warning(
+            self._diag("warning", 
                 "Ender power response received, but its numeric field "
                 "is not yet recognised"
             )
             return None
 
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Failed to read Ender Tapo current power: %s",
                 e,
             )
@@ -773,14 +959,14 @@ class TapoAutoShutdownPlugin(
 
     def _bed_cooling_monitor_background(self, generation):
         """Notify at 40 C and switch off the printer plug at 30 C or below."""
-        self._logger.info(
+        self._diag("info", 
             "Bed-cooling monitor started: reminder at 40 C, shutdown at 30 C"
         )
 
         while True:
             with self._bed_cooling_monitor_lock:
                 if generation != self._bed_cooling_monitor_generation:
-                    self._logger.info("Bed-cooling monitor stopped")
+                    self._diag("info", "Bed-cooling monitor stopped")
                     return
 
             try:
@@ -789,18 +975,18 @@ class TapoAutoShutdownPlugin(
                 actual = bed.get("actual") if isinstance(bed, dict) else None
 
                 if not isinstance(actual, (int, float)):
-                    self._logger.warning(
+                    self._diag("warning", 
                         "Bed-cooling monitor: actual bed temperature unavailable; will retry"
                     )
                 else:
                     actual = float(actual)
-                    self._logger.info(
+                    self._diag("info", 
                         "Bed-cooling monitor: bed actual temperature %.1f C",
                         actual,
                     )
 
                     if actual <= 30.0:
-                        self._logger.info(
+                        self._diag("info", 
                             "Bed reached %.1f C; switching off Ender Tapo plug",
                             actual,
                         )
@@ -808,7 +994,7 @@ class TapoAutoShutdownPlugin(
                       
                         if switched_off:
                             self._ender_plug_off = True
-                            self._logger.info(
+                            self._diag("info", 
                                 "Ender Tapo plug switched off after bed cooled to 30 C or below; Ender-off flag set"
                             )
                             self._plugin_manager.send_plugin_message(
@@ -822,7 +1008,7 @@ class TapoAutoShutdownPlugin(
                             self._maybe_start_octopi_shutdown()
                             return
                         else:
-                            self._logger.error(
+                            self._diag("error", 
                                 "Could not switch off Ender Tapo plug; monitor will retry"
                             )
                             time.sleep(10)
@@ -850,7 +1036,7 @@ class TapoAutoShutdownPlugin(
                                     ),
                                 },
                             )
-                            self._logger.info(
+                            self._diag("info", 
                                 "Sent one-time bed-removal reminder at %.1f C",
                                 actual,
                             )
@@ -881,7 +1067,7 @@ class TapoAutoShutdownPlugin(
                                     ),
                                 },
                             )
-                            self._logger.info(
+                            self._diag("info", 
                                 "Sent one-time Tapo shutdown warning at %.1f C",
                                 actual,
                             )
@@ -890,7 +1076,7 @@ class TapoAutoShutdownPlugin(
                             )
 
             except Exception as e:
-                self._logger.warning(
+                self._diag("warning", 
                     "Bed-cooling monitor could not read temperature or process state; "
                     "it will retry: %s",
                     e,
@@ -905,7 +1091,7 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._logger.error(
+            self._diag("error", 
                 "Cannot switch off Ender Tapo: credentials or IP are missing"
             )
             return False
@@ -919,7 +1105,7 @@ class TapoAutoShutdownPlugin(
             )
             return True
         except Exception as e:
-            self._logger.error("Failed to switch off Ender Tapo plug: %s", e)
+            self._diag("error", "Failed to switch off Ender Tapo plug: %s", e)
             return False
 
     # Run the OctoPi shutdown sequence in the background
@@ -931,7 +1117,7 @@ class TapoAutoShutdownPlugin(
         if timer_armed:
             self._shutdown_octopi()
         else:
-            self._logger.error(
+            self._diag("error", 
                 "OctoPi shutdown cancelled because the Tapo timer could not be armed"
             )
     
@@ -942,7 +1128,7 @@ class TapoAutoShutdownPlugin(
         ip = (self._settings.get(["octopi_tapo_ip"]) or "").strip()
 
         if not username or not password or not ip:
-            self._logger.error(
+            self._diag("error", 
                 "Cannot cancel OctoPi Tapo timer after shutdown failure: "
                 "Tapo credentials or IP are missing"
             )
@@ -952,13 +1138,13 @@ class TapoAutoShutdownPlugin(
             client = ApiClient(username, password)
             plug = await client.p110(ip)
             await plug.clear_timer()
-            self._logger.warning(
+            self._diag("warning", 
                 "OctoPi Tapo shutdown timer cancelled after shutdown-request failure; "
                 "Raspberry Pi power will remain on"
             )
             return True
         except Exception as e:
-            self._logger.error(
+            self._diag("error", 
                 "Failed to cancel OctoPi Tapo timer after shutdown failure: %s",
                 e,
             )
@@ -969,27 +1155,27 @@ class TapoAutoShutdownPlugin(
     # cannot observe a later OS shutdown failure after OctoPrint has stopped.
     def _shutdown_octopi(self):
         try:
-            self._logger.info(
+            self._diag("info", 
                 "Requesting clean OctoPi shutdown; five-minute Tapo timer is armed"
             )
             system_command_manager().perform_system_shutdown()
-            self._logger.info(
+            self._diag("info", 
                 "OctoPrint shutdown request submitted; Tapo timer remains armed"
             )
             return True
         except Exception as e:
-            self._logger.exception(
+            self._diag("exception", 
                 "OctoPrint shutdown request failed; cancelling OctoPi Tapo timer"
             )
             try:
                 cancelled = asyncio.run(self._clear_octopi_tapo_timer())
                 if not cancelled:
-                    self._logger.critical(
+                    self._diag("critical", 
                         "Shutdown request failed and the OctoPi Tapo timer could not be "
                         "confirmed cancelled; check the Tapo app immediately"
                     )
             except Exception:
-                self._logger.exception(
+                self._diag("exception", 
                     "Unexpected error while cancelling the OctoPi Tapo timer"
                 )
             return False
@@ -1104,7 +1290,6 @@ class TapoAutoShutdownPlugin(
             "bed_preheat_enabled": False,
 
             # OctoPi Tapo P110
-            "octopi_tapo_enabled": False,
             "octopi_tapo_ip": "",
             "octopi_tapo_ip_last_octet": "",
 

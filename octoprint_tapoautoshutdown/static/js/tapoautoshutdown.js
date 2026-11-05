@@ -1,7 +1,6 @@
-
- // OctoPrint view model for notifications sent by the Tapo Auto Shutdown plugin.
- // This file displays messages from the Python backend; it does not control the
- // heater, read temperatures, or switch the Tapo plug off itself.
+// OctoPrint view model for notifications sent by the Tapo Auto Shutdown plugin.
+// This file displays messages from the Python backend; it does not control the
+// heater, read temperatures, or switch the Tapo plug off itself.
 function TapoAutoShutdownViewModel(parameters) {
     var self = this;
 
@@ -11,6 +10,7 @@ function TapoAutoShutdownViewModel(parameters) {
     var bedCoolingReminder = null;
     var bedCoolingShutdownWarning = null;
     var bedCoolingShutdown = null;
+    var socTemperatureWarning = null;
 
     // Clear the persistent green preheat box when OctoPrint reports that
     // the printer has disconnected, for example after the Tapo plug is off.
@@ -29,6 +29,35 @@ function TapoAutoShutdownViewModel(parameters) {
         // Ignore messages from every other plugin.
         if (plugin !== "tapoautoshutdown") {
             return;
+        }
+
+        // RASPBERRY PI TEMPERATURE ELEVATED:
+        // Persistent warning when the SoC reaches 60°C.
+        if (data.type === "soc_temperature_elevated") {
+            // Avoid creating duplicate warning boxes.
+            if (!socTemperatureWarning) {
+                socTemperatureWarning = new PNotify({
+                    title: "Tapo Auto Shutdown - Raspberry Pi Temperature",
+                    text: "Temperature elevated: " +
+                        data.temperature + "°C. " +
+                        "Check that the Raspberry Pi cooling fan is working.",
+                    type: "warning",
+                    hide: false,
+                    modules: {
+                        Animate: { animate: false },
+                        Mobile: { swipeDismiss: false }
+                    }
+                });
+            }
+        }
+
+        // RASPBERRY PI TEMPERATURE NORMAL:
+        // Remove the persistent warning when the temperature falls below 60°C.
+        if (data.type === "soc_temperature_normal") {
+            if (socTemperatureWarning) {
+                socTemperatureWarning.remove();
+                socTemperatureWarning = null;
+            }
         }
 
         // LIGHT BAR REMINDER: shown before automatic bed preheating.
@@ -138,7 +167,7 @@ function TapoAutoShutdownViewModel(parameters) {
                 bedCoolingReminder.remove();
                 bedCoolingReminder = null;
             }
-        
+
             bedCoolingShutdownWarning = new PNotify({
                 title: "Tapo Auto Shutdown",
                 text: data.message,

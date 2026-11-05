@@ -1,4 +1,4 @@
-# **OctoPrint-TapoAutoShutdown v0.3.2.3**
+# **OctoPrint-TapoAutoShutdown v0.3.2.4**
 
 ## Version differences
 
@@ -44,7 +44,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Added warning boxes to tell the user to try to remove a print at 40°C+ a final reminder at 32°C
 * Added warning box to show that the printer has turned off at 30°C
 
-**v0.3.2.2 — Added ntfy push notifications (this is for Alex) and a separate TASD log**
+**v0.3.2.2 — Added ntfy push notifications and a separate TASD log**
 
 * Fixed the need to reboot OctoPrint so that the TASD plugin settings screen appears. After the v0.3.0.1 minor update.
 * Changed the settings layout so you only need to change the last part of each Tapo's IP address.
@@ -64,10 +64,25 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
-* INFO - DEBUG - WARNING tagged logs are now part of plug_autotaposhutdown.log for completion.
+* INFO - DEBUG - WARNING tagged logs are now part of plugin_tapoautoshutdown.log for completion.
 * This makes it much easier to identify any possible TAPO plug communication problems.
 * Also throttled the Ender Tapo power readings to 10 seconds, to avoid the power readings from causing clutter.
-  
+
+**v0.3.2.4 — Improved the dedicated plugin log warnings and added SoC monitoring for the Raspberry Pi**
+
+* WARNING - Ender power reading skipped: Tapo credentials or IP are missing now only shows once.
+* DEBUG - Ender Tapo current power response throttled to every 10 seconds
+* WARNING - Added the empty ntfy topic in case you forget to add it.
+* All Tapo Auto Shutdown diagnostic logging is now written to the dedicated plugin_tapoautoshutdown.log file, keeping plugin messages separate from the main OctoPrint log.
+* Add Raspberry Pi SoC monitoring to provide additional thermal protection alongside the Pi's built-in thermal management.
+* Monitor the Pi's SoC temperature every 10 seconds. The plugin warning threshold is set to 60°C, log a warning.
+* Log every SoC reading in our dedicated Tapo log, normal operating temp 30–40°C
+* If the next reading, 10 seconds later, is also 70°C or higher, request a clean Raspberry Pi shutdown.
+* Before the Raspberry Pi progressively throttles the ARM CPU at 80–85°C
+* Send an urgent ntfy notification when the shutdown is triggered.
+* If the temperature drops below 70°C before the second reading, the consecutive-reading counter resets.
+
+
 **Upgrading to the latest version**
 
 * Latest version retains the existing printer shutdown and Obico AI monitoring functionality while introducing the additional OctoPi plug controls.
@@ -94,6 +109,14 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 - Arms and verifies the Tapo power-off timer before requesting a clean Linux shutdown.
 - Provides a configurable OctoPi shutdown delay in minutes.
 - Cancels automatic shutdown if timelapse rendering fails.
+
+### Raspberry Pi thermal protection
+
+- Monitors the Raspberry Pi SoC temperature every 10 seconds.
+- Displays a persistent OctoPrint warning when the temperature reaches 60°C.
+- Automatically clears the warning when the temperature falls below 60°C.
+- Requests a clean Raspberry Pi shutdown after two consecutive readings at or above 70°C.
+- Sends an urgent ntfy notification when emergency shutdown is initiated, if ntfy is configured.
 
 ### Obico AI monitoring
 
@@ -130,7 +153,7 @@ settings interface.
 - Important: Automatic OctoPi shutdown is optional and should be enabled only after careful testing.
 - When automatic OctoPi shutdown is enabled, the plugin waits for a successful print and completed timelapse rendering. It then arms and verifies the Tapo P110 power-off timer before requesting a clean Linux shutdown.
 - The smart plug timer operates independently of Linux. The plugin cannot guarantee that the Raspberry Pi has completely finished shutting down before the timer switches off the power.
-- Choose a shutdown delay that provides sufficient time for your system to shut down cleanly. The default delay is 15 minutes, with a configured range of 1–60 minutes.
+- Choose a shutdown delay that provides sufficient time for your system to shut down cleanly. The default delay is 5 minutes, with a configured range of 1–60 minutes.
 - If the Tapo timer cannot be armed and verified, the plugin cancels the automatic shutdown request.
 - If the shutdown request fails after the timer has been armed, the plugin attempts to clear the timer.
 - The printer shutdown feature is separate from the Raspberry Pi shutdown feature. Configure and test each independently.
