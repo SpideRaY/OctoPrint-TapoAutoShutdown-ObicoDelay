@@ -1290,7 +1290,6 @@ class TapoAutoShutdownPlugin(
             "bed_preheat_enabled": False,
 
             # OctoPi Tapo P110
-            "octopi_tapo_enabled": False,
             "octopi_tapo_ip": "",
             "octopi_tapo_ip_last_octet": "",
 
