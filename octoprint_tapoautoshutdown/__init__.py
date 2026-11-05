@@ -368,8 +368,8 @@ class TapoAutoShutdownPlugin(
                     e,
                 )
 
-            # Poll every 10 seconds to reduce unnecessary Tapo API requests.
-            # Three consecutive high readings are still required for connection.
+            # Poll every second so printer power-on is detected promptly.
+            # Successful power diagnostics are throttled separately to 10 seconds.
             time.sleep(1)
     
     def on_shutdown(self):
