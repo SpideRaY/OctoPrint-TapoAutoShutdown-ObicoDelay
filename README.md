@@ -64,7 +64,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.3 — Moved all the TASD logging from the main OctoPrint to the dedicated plugin log**
 
-* INFO - DEBUG - WARNING tagged logs are now part of plugin_autotaposhutdown.log for completion.
+* INFO - DEBUG - WARNING tagged logs are now part of plugin_tapoautoshutdown.log for completion.
 * This makes it much easier to identify any possible TAPO plug communication problems.
 * Also throttled the Ender Tapo power readings to 10 seconds, to avoid the power readings from causing clutter.
 
@@ -74,8 +74,8 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * DEBUG - Ender Tapo current power response throttled to every 10 seconds
 * WARNING - Added the empty ntfy topic in case you forget to add it.
 * All Tapo Auto Shutdown diagnostic logging is now written to the dedicated plugin_tapoautoshutdown.log file, keeping plugin messages separate from the main OctoPrint log.
-* Add SoC monitoring so that it will shutdown the Pi to provide additional thermal protection to the built in Pi monitoring.
-* Monitor the Pi's SoC temperature every 30 seconds. The plugin warning threshold is set to 60°C, log a warning.
+* Add Raspberry Pi SoC monitoring to provide additional thermal protection alongside the Pi's built-in thermal management.
+* Monitor the Pi's SoC temperature every 10 seconds. The plugin warning threshold is set to 60°C, log a warning.
 * Log every SoC reading in our dedicated Tapo log, normal operating temp 30–40°C
 * If the next reading, 30 seconds later, is also 70°C or higher, request a clean Raspberry Pi shutdown.
 * Before the Raspberry Pi progressively throttles the ARM CPU at 80–85°C
@@ -110,7 +110,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 - Provides a configurable OctoPi shutdown delay in minutes.
 - Cancels automatic shutdown if timelapse rendering fails.
 
-### Rapsberry Pi thermal protection
+### Raspberry Pi thermal protection
 
 - Monitors the Raspberry Pi SoC temperature every 10 seconds.
 - Displays a persistent OctoPrint warning when the temperature reaches 60°C.
