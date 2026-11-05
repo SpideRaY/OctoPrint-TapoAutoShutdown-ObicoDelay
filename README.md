@@ -153,7 +153,7 @@ settings interface.
 - Important: Automatic OctoPi shutdown is optional and should be enabled only after careful testing.
 - When automatic OctoPi shutdown is enabled, the plugin waits for a successful print and completed timelapse rendering. It then arms and verifies the Tapo P110 power-off timer before requesting a clean Linux shutdown.
 - The smart plug timer operates independently of Linux. The plugin cannot guarantee that the Raspberry Pi has completely finished shutting down before the timer switches off the power.
-- Choose a shutdown delay that provides sufficient time for your system to shut down cleanly. The default delay is 15 minutes, with a configured range of 1–60 minutes.
+- Choose a shutdown delay that provides sufficient time for your system to shut down cleanly. The default delay is 5 minutes, with a configured range of 1–60 minutes.
 - If the Tapo timer cannot be armed and verified, the plugin cancels the automatic shutdown request.
 - If the shutdown request fails after the timer has been armed, the plugin attempts to clear the timer.
 - The printer shutdown feature is separate from the Raspberry Pi shutdown feature. Configure and test each independently.
