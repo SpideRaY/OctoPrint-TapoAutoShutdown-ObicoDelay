@@ -180,8 +180,9 @@ class TapoAutoShutdownPlugin(
             daemon=True,
         ).start()
 
-        # Start silent Raspberry Pi SoC temperature logging (recovered v0.3.3).
-        # Readings only: no UI alerts and no automatic shutdown behaviour.
+        # Start Raspberry Pi SoC temperature monitoring.
+        # The monitor displays an OctoPrint warning at 60°C and requests
+        # a clean shutdown after two consecutive readings at or above 70°C.
         if not getattr(self, "_soc_temperature_thread_started", False):
             self._soc_temperature_thread_started = True
             threading.Thread(
