@@ -77,7 +77,7 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Add Raspberry Pi SoC monitoring to provide additional thermal protection alongside the Pi's built-in thermal management.
 * Monitor the Pi's SoC temperature every 10 seconds. The plugin warning threshold is set to 60°C, log a warning.
 * Log every SoC reading in our dedicated Tapo log, normal operating temp 30–40°C
-* If the next reading, 30 seconds later, is also 70°C or higher, request a clean Raspberry Pi shutdown.
+* If the next reading, 10 seconds later, is also 70°C or higher, request a clean Raspberry Pi shutdown.
 * Before the Raspberry Pi progressively throttles the ARM CPU at 80–85°C
 * Send an urgent ntfy notification when the shutdown is triggered.
 * If the temperature drops below 70°C before the second reading, the consecutive-reading counter resets.
