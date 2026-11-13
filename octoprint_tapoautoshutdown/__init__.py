@@ -403,6 +403,9 @@ class TapoAutoShutdownPlugin(
             self._diag("info", 
                 "Timelapse rendering completed successfully"
             )
+            if self._settings.get(["nightowl_shutdown_enabled"]):
+                self._maybe_start_nightowl_shutdown()
+            
             self._maybe_start_octopi_shutdown()
 
         # Record failed timelapse rendering
