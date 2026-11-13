@@ -1278,6 +1278,10 @@ class TapoAutoShutdownPlugin(
 
     def get_settings_defaults(self):
         return {
+
+            #Night Owl Shutdown
+            "nightowl_shutdown_enabled": False,
+            
             # Tapo Account
             "username": "",
             "password": "",
