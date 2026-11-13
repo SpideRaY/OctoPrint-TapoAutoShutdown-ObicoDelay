@@ -1107,11 +1107,11 @@ class TapoAutoShutdownPlugin(
             await plug.off()
             if notify:
                 self._send_ntfy_notification(
-                    " 🔌Ender 3 Pro Tapo plug switched off after bed cooling."
-            )
+                    " 🔌Printer Tapo plug switched off after bed cooling."
+                )
             return True
         except Exception as e:
-            self._diag("error", "Failed to switch off Ender Tapo plug: %s", e)
+            self._diag("error", "Failed to switch off Printer Tapo plug: %s", e)
             return False
 
     # Run the OctoPi shutdown sequence in the background
