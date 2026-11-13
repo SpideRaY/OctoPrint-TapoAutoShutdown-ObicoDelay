@@ -42,6 +42,8 @@ class TapoAutoShutdownPlugin(
         self._timelapse_failed = False
         self._ender_plug_off = False
         self._octopi_shutdown_started = False
+        self._nightowl_shutdown_started = False
+        self._nightowl_shutdown_lock = threading.Lock()
         self._auto_connect_handled = False
         self._auto_connect_lock = threading.Lock()
         self._bed_preheat_handled = False
@@ -1087,7 +1089,7 @@ class TapoAutoShutdownPlugin(
 
             time.sleep(10)
 
-    async def _switch_off_ender_tapo(self):
+    async def _switch_off_ender_tapo(self, notify=True):
         """Switch off the Ender plug directly; do not arm a fixed timer."""
         username = (self._settings.get(["username"]) or "").strip()
         password = self._settings.get(["password"])
@@ -1103,8 +1105,9 @@ class TapoAutoShutdownPlugin(
             client = ApiClient(username, password)
             plug = await client.p110(ip)
             await plug.off()
-            self._send_ntfy_notification(
-                " 🔌Ender 3 Pro Tapo plug switched off after bed cooling."
+            if notify:
+                self._send_ntfy_notification(
+                    " 🔌Ender 3 Pro Tapo plug switched off after bed cooling."
             )
             return True
         except Exception as e:
