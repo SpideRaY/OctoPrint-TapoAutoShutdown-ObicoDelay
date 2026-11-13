@@ -66,7 +66,19 @@
     </div>
 </div>
 
-
+<div class="control-group">
+    <label class="control-label">Printer night owl automatic shutdown</label>
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox"
+                data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
+            Enable automatic OctoPi shutdown
+        </label>
+        <p class="help-block">
+            When enabled, the Printer Tapo will shutdown after the print has finished this bypasses the daytime bed cooling to 30°C shutdown and the ntfy alerts this will save an extra 15 mins power.
+        </p>
+    </div>
+</div>
 
 <div class="control-group">
     <label class="control-label">OctoPi automatic shutdown</label>
