@@ -516,7 +516,7 @@ class TapoAutoShutdownPlugin(
             self._printer.set_temperature("bed", temperature)
 
             self._send_ntfy_notification(
-                f" 🔥 Ender 3 Pro - Bed preheating set to {temperature:.0f}°C"
+                f" 🔥 Printer - Bed preheating set to {temperature:.0f}°C"
             )
             self._diag("info", 
                 "Automatic bed preheat requested: %.1f C",
@@ -592,7 +592,7 @@ class TapoAutoShutdownPlugin(
                             )
 
                             self._send_ntfy_notification(
-                                f"✅ Ender 3 Pro - Bed preheated to {actual:.1f}°C."
+                                f"✅ Printer - Bed preheated to {actual:.1f}°C."
                             )
                             self._diag(
                                 "info",
@@ -1046,7 +1046,7 @@ class TapoAutoShutdownPlugin(
                                 actual,
                             )
                             self._send_ntfy_notification(
-                                f" ❄️ Ender 3 Pro bed is at {actual:.1f}°C or below — you may be able to remove your print."
+                                f" ❄️ Printer bed is at {actual:.1f}°C or below — you may be able to remove your print."
                             )
 
                     if actual <= 32.0:
@@ -1077,7 +1077,7 @@ class TapoAutoShutdownPlugin(
                                 actual,
                             )
                             self._send_ntfy_notification(
-                                f"⚠️ Ender 3 Pro bed is at {actual:.1f}°C — the printer's Tapo plug will switch off automatically at 30°C."
+                                f"⚠️ Printer bed is at {actual:.1f}°C — the printer's Tapo plug will switch off automatically at 30°C."
                             )
 
             except Exception as e:
