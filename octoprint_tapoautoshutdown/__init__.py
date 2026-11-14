@@ -1314,6 +1314,9 @@ class TapoAutoShutdownPlugin(
         nightowl_was_enabled = bool(
             existing.get("nightowl_shutdown_enabled", False)
         )
+        octopi_was_enabled = bool(
+            existing.get("octopi_shutdown_enabled", False)
+        )
 
         # Apply only values actually submitted by the settings page.
         merged_data.update(data or {})
