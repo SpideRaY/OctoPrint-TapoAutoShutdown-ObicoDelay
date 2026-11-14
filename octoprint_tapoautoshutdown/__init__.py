@@ -631,9 +631,6 @@ class TapoAutoShutdownPlugin(
                 ),
             },
         )
-            
-
-    
     
     def _maybe_start_octopi_shutdown(self):
         if self._octopi_shutdown_started:
