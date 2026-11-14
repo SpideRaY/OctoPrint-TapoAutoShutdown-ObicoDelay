@@ -1354,6 +1354,40 @@ class TapoAutoShutdownPlugin(
         octoprint.plugin.SettingsPlugin.on_settings_save(
             self, merged_data
        )
+        # Notify when Bed Preheat changes from OFF to ON.
+        nightowl_now_enabled = bool(
+            merged_data.get("bed_preheat_shutdown_enabled", False)
+       )
+
+        if bed_preheat_now_enabled and not bed_preheat_was_enabled:
+
+            message = (
+                "🔥 Bed Preheat mode activated – printer will start heating"
+                "automatically after a successful Octopi connection."
+            )
+
+            self._diag(
+                "info",
+                "Bed Preheat  mode activated in plugin settings"
+            )
+
+            # OctoPrint browser notification
+            try:
+                self._plugin_manager.send_plugin_message(
+                    "tapoautoshutdown",
+                    {"type": "bed_preheat_activated"},
+                )
+            except Exception as exc:
+                self._diag(
+                    "warning",
+                    "Could not display Bed Preheat activation notice: %s",
+                    exc
+                )
+
+            # ntfy phone notification
+            self._send_ntfy_notification(message)
+
+        
         # Notify when Night Owl changes from OFF to ON.
         nightowl_now_enabled = bool(
             merged_data.get("nightowl_shutdown_enabled", False)
