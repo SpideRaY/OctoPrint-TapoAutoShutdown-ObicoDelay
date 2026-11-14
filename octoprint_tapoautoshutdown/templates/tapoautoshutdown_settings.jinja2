@@ -88,6 +88,14 @@
                 data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
             🐙 Enable automatic OctoPi shutdown
         </label>
+        <div class="alert alert-warning"
+            data-bind="visible: settings.plugins.tapoautoshutdown.nightowl_shutdown_enabled"
+            role="status">
+
+            🦉 <strong>Night Owl mode is activated.</strong>
+            The printer will switch off automatically after a
+            successful print and timelapse.
+        </div>
         <p class="help-block">
             When enabled, the OctoPi Tapo shutdown timer starts when the Ender Tapo plug has switched off after the bed cools to 30°C. OctoPrint is then asked to shut down cleanly. If a shutdown failure is detected it will attempt to cancel the timer.
         </p>
