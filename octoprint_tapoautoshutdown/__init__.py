@@ -417,20 +417,27 @@ class TapoAutoShutdownPlugin(
             self._cancel_obico_timer()
             self._disable_obico_monitoring()
 
-            # Start bed-temperature monitoring for printer shutdown.
-            username = (self._settings.get(["username"]) or "").strip()
-            password = self._settings.get(["password"])
-            ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
-
-            if username and password and ip:
-                self._diag("info", 
-                    "Print completed - starting bed-cooling monitor"
+            # Night Owl bypasses daytime bed-cooling monitoring.
+            if self._settings.get(["nightowl_shutdown_enabled"]):
+                self._diag("info",
+                    "Night Owl enabled - skipping bed-cooling monitor"
                 )
-                self._start_bed_cooling_monitor()
+                self._maybe_start_nightowl_shutdown()
             else:
-                self._diag("warning", 
-                    "Bed-cooling monitor not started: Tapo credentials or IP missing"
-                )
+                # Preserve normal daytime bed-cooling behaviour.
+                username = (self._settings.get(["username"]) or "").strip()
+                password = self._settings.get(["password"])
+                ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
+
+                if username and password and ip:
+                    self._diag("info",
+                        "Print completed - starting bed-cooling monitor"
+                    )
+                    self._start_bed_cooling_monitor()
+                else:
+                    self._diag("warning",
+                        "Bed-cooling monitor not started: Tapo credentials or IP missing"
+                    )
 
             # Check whether OctoPi shutdown should proceed
             if self._settings.get(["octopi_shutdown_enabled"]):
