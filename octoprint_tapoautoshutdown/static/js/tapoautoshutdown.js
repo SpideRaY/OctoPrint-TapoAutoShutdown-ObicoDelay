@@ -52,6 +52,28 @@ function TapoAutoShutdownViewModel(parameters) {
             });
         }
 
+        // OCTOPI AUTOMATIC SHUTDOWN ACTIVATED
+        if (data.type === "octopi_shutdown_activated") {
+
+            new PNotify({
+                title: "Tapo Auto Shutdown - OctoPi",
+
+                text: "🐙 Automatic OctoPi shutdown activated – " +
+                      "OctoPi will shut down cleanly after a " +
+                      "successful print and timelapse, once the " +
+                      "printer Tapo plug is off.",
+
+                type: "notice",
+                hide: true,
+                delay: 10000,
+
+                modules: {
+                    Animate: { animate: false },
+                    Mobile: { swipeDismiss: false }
+                }
+            });
+        }
+
         // RASPBERRY PI TEMPERATURE ELEVATED:
         // Persistent warning when the SoC reaches 60°C.
         if (data.type === "soc_temperature_elevated") {
