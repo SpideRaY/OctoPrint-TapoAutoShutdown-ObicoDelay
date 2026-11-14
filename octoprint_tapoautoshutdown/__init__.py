@@ -391,6 +391,7 @@ class TapoAutoShutdownPlugin(
             self._timelapse_done = False
             self._timelapse_failed = False
             self._ender_plug_off = False
+            self._nightowl_shutdown_started = False
             self._octopi_shutdown_started = False
             with self._bed_cooling_monitor_lock:
                 self._bed_cooling_monitor_generation += 1
@@ -638,6 +639,59 @@ class TapoAutoShutdownPlugin(
                 ),
             },
         )
+
+    def _maybe_start_nightowl_shutdown(self):
+        if not self._settings.get(["nightowl_shutdown_enabled"]):
+            return
+
+        with self._nightowl_shutdown_lock:
+            if self._nightowl_shutdown_started or self._ender_plug_off:
+                return
+
+            if not self._successful_print:
+                return
+
+            if self._timelapse_failed:
+                self._diag("error",
+                    "Night Owl shutdown cancelled because timelapse rendering failed"
+                )
+                return
+
+            if not self._timelapse_done:
+                self._diag("info",
+                    "Night Owl waiting for timelapse rendering to finish"
+                )
+                return
+
+            self._nightowl_shutdown_started = True
+
+        self._diag("info",
+            "Night Owl: print and timelapse successful - switching off printer"
+        )
+
+        threading.Thread(
+            target=self._nightowl_shutdown_sequence,
+            daemon=True,
+        ).start()
+
+    def _nightowl_shutdown_sequence(self):
+        switched_off = asyncio.run(
+            self._switch_off_ender_tapo(notify=False)
+        )
+
+        if switched_off:
+            self._ender_plug_off = True
+            self._diag("info",
+                "Night Owl successfully switched off printer Tapo plug"
+            )
+            self._maybe_start_octopi_shutdown()
+        else:
+            self._diag("error",
+                "Night Owl could not switch off printer Tapo plug"
+            )
+            with self._nightowl_shutdown_lock:
+                self._nightowl_shutdown_started = False
+
     
     def _maybe_start_octopi_shutdown(self):
         if self._octopi_shutdown_started:
