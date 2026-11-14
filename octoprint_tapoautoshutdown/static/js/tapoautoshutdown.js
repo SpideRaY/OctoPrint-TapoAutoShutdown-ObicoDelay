@@ -38,8 +38,8 @@ function TapoAutoShutdownViewModel(parameters) {
             new PNotify({
                 title: "Tapo Auto Shutdown - Bed Preheat",
 
-                text: "🔥 Automatic Bed Preheat activated – printer bed will" +
-                      "automatically preheat to 50°C when the printer connects" +
+                text: "🔥 Automatic Bed Preheat activated – printer bed will " +
+                      "automatically preheat to 50°C when the printer connects " +
                       "and is ready.",
 
                 type: "notice",
