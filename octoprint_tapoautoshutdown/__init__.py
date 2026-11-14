@@ -1383,6 +1383,40 @@ class TapoAutoShutdownPlugin(
                     "Could not display Night Owl activation notice: %s",
                     exc
                 )
+                
+        # Notify when OctoPi Automatic Shutdown changes from OFF to ON.
+        octopi_now_enabled = bool(
+            merged_data.get("octopi_shutdown_enabled", False)
+        )
+
+        if octopi_now_enabled and not octopi_was_enabled:
+
+            message = (
+                "🐙 Automatic OctoPi shutdown activated – "
+                "OctoPi will shut down cleanly after a successful "
+                "print and timelapse, once the printer Tapo plug is off."
+            )
+
+            self._diag(
+                "info",
+                "Automatic OctoPi shutdown activated in plugin settings"
+            )
+
+            # OctoPrint browser notification
+            try:
+                self._plugin_manager.send_plugin_message(
+                    "tapoautoshutdown",
+                    {"type": "octopi_shutdown_activated"},
+                )
+            except Exception as exc:
+                self._diag(
+                    "warning",
+                    "Could not display OctoPi shutdown activation notice: %s",
+                    exc
+                )
+
+            # ntfy phone notification
+            self._send_ntfy_notification(message)
 
             # ntfy phone notification
             self._send_ntfy_notification(message)
