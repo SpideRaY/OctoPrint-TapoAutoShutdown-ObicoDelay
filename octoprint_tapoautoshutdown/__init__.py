@@ -1312,7 +1312,7 @@ class TapoAutoShutdownPlugin(
         existing = self._settings.get_all_data(merged=True) or {}
         merged_data = dict(existing)
         bed_preheat_was_enabled = bool(
-            existing.get("bed_preheat_shutdown_enabled", False)
+            existing.get("bed_preheat_enabled", False)
         )
         nightowl_was_enabled = bool(
             existing.get("nightowl_shutdown_enabled", False)
@@ -1359,7 +1359,7 @@ class TapoAutoShutdownPlugin(
        )
         # Notify when Bed Preheat changes from OFF to ON.
         bed_preheat_now_enabled = bool(
-            merged_data.get("bed_preheat_shutdown_enabled", False)
+            merged_data.get("bed_preheat_enabled", False)
        )
 
         if bed_preheat_now_enabled and not bed_preheat_was_enabled:
