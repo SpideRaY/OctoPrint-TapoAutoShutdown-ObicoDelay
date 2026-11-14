@@ -38,10 +38,9 @@ function TapoAutoShutdownViewModel(parameters) {
             new PNotify({
                 title: "Tapo Auto Shutdown - Bed Preheat",
 
-                text: "🦉 Bed Preheat mode activated – printer will " +
-                      "When the printer Tapo plug is turned ON and Octoprint is connected" +
-                      "the printer will automatically heat the bed to 50°C " +
-                      "This will save printing time as you select your GCODE file.",
+                text: "🔥 Automatic Bed Preheat activated – printer bed will" +
+                      "automatically preheat to 50°C when the printer connects" +
+                      "and is ready.",
 
                 type: "notice",
                 hide: true,
