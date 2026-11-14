@@ -31,6 +31,27 @@ function TapoAutoShutdownViewModel(parameters) {
             return;
         }
 
+        // NIGHT OWL MODE ACTIVATED
+        if (data.type === "nightowl_activated") {
+
+            new PNotify({
+                title: "Tapo Auto Shutdown - Night Owl",
+
+                text: "🦉 Night Owl mode activated – printer will " +
+                      "switch off automatically after a successful " +
+                      "print and timelapse.",
+
+                type: "notice",
+                hide: true,
+               delay: 10000,
+
+               modules: {
+                    Animate: { animate: false },
+                    Mobile: { swipeDismiss: false }
+               }
+            });
+        }
+
         // RASPBERRY PI TEMPERATURE ELEVATED:
         // Persistent warning when the SoC reaches 60°C.
         if (data.type === "soc_temperature_elevated") {
