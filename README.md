@@ -82,6 +82,13 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Send an urgent ntfy notification when the shutdown is triggered.
 * If the temperature drops below 70°C before the second reading, the consecutive-reading counter resets.
 
+**v0.3.2.5 — Added Night Owl function to save power on longer over night prints**
+
+* Added the option to override the normal bed cooling procedure that shuts down the printer after a sucessful video render.
+* Added hyperlinks to the Obico and ntfy websites on the settings screen for those who require them.
+* Moved the Tapo plug IP's to the same line save space on the settings screen.
+* Added emoji's to the checkboxes to make them move visable, to add some fun.
+* 
 
 **Upgrading to the latest version**
 
