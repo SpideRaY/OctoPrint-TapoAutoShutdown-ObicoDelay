@@ -84,11 +84,12 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 
 **v0.3.2.5 — Added Night Owl function to save power on longer over night prints**
 
-* Added the option to override the normal bed cooling procedure that shuts down the printer after a sucessful video render.
-* Added hyperlinks to the Obico and ntfy websites on the settings screen for those who require them.
-* Moved the Tapo plug IP's to the same line save space on the settings screen.
-* Added emoji's to the checkboxes to make them move visable, to add some fun.
-* 
+* Added optional Night Owl automatic printer shutdown for overnight prints.
+* Night Owl waits for successful print and timelapse completion then shuts down the printer tapo.
+* Skips daytime bed-cooling monitoring and notifications. Preserves OctoApp, Obico and emergency notifications.
+* Renamed OctoPi shutdown delay to Raspberry Pi shutdown delay, Night Owl and Raspberry Pi shutdown disabled by default.
+* Documented Obico's 30-minute default whilst the first layers are manually checked, zero enables immediate monitoring when print starts.
+* Added clickable hyperlinks to both ntfy and Obico websites, for more information and their mobile apps.
 
 **Upgrading to the latest version**
 
