@@ -1416,12 +1416,9 @@ class TapoAutoShutdownPlugin(
                 )
 
             # ntfy phone notification
-            self._send_ntfy_notification(message)
+            self._send_ntfy_notification(message)     
 
-            # ntfy phone notification
-            self._send_ntfy_notification(message)
-        
-
+    
     def get_settings_defaults(self):
         return {
             
