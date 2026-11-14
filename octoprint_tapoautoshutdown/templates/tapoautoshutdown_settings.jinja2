@@ -57,7 +57,7 @@
         <label class="checkbox">
             <input type="checkbox"
                    data-bind="checked: settings.plugins.tapoautoshutdown.bed_preheat_enabled">
-            Enable automatic bed preheat
+            🔥Enable automatic bed preheat
         </label>
         <p class="help-block">
             Automatically heat the bed to a fixed target of 50°C after
@@ -67,12 +67,12 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">Printer night owl automatic shutdown</label>
+    <label class="control-label">Enable Night Owl automatic shutdown</label>
     <div class="controls">
         <label class="checkbox">
             <input type="checkbox"
-                data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
-            Enable automatic OctoPi shutdown
+                data-bind="checked: settings.plugins.tapoautoshutdown.nightowl_shutdown_enabled">
+            🦉 Enable automatic OctoPi shutdown
         </label>
         <p class="help-block">
             When enabled, the Printer Tapo will shutdown after the print has finished this bypasses the daytime bed cooling to 30°C shutdown and the ntfy alerts this will save an extra 15 mins power.
@@ -86,7 +86,7 @@
         <label class="checkbox">
             <input type="checkbox"
                 data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
-            Enable automatic OctoPi shutdown
+            🐙 Enable automatic OctoPi shutdown
         </label>
         <p class="help-block">
             When enabled, the OctoPi Tapo shutdown timer starts when the Ender Tapo plug has switched off after the bed cools to 30°C. OctoPrint is then asked to shut down cleanly. If a shutdown failure is detected it will attempt to cancel the timer.
