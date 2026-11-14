@@ -1383,6 +1383,9 @@ class TapoAutoShutdownPlugin(
                     "Could not display Night Owl activation notice: %s",
                     exc
                 )
+
+            # ntfy phone notification
+            self._send_ntfy_notification(message)
                 
         # Notify when OctoPi Automatic Shutdown changes from OFF to ON.
         octopi_now_enabled = bool(
