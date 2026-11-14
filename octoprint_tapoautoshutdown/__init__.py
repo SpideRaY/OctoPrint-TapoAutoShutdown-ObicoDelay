@@ -1312,7 +1312,7 @@ class TapoAutoShutdownPlugin(
         existing = self._settings.get_all_data(merged=True) or {}
         merged_data = dict(existing)
         nightowl_was_enabled = bool(
-        existing.get("nightowl_shutdown_enabled", False)
+            existing.get("nightowl_shutdown_enabled", False)
         )
 
         # Apply only values actually submitted by the settings page.
@@ -1368,21 +1368,21 @@ class TapoAutoShutdownPlugin(
                 "Night Owl mode activated in plugin settings"
             )
 
-        # OctoPrint browser notification
-        try:
-            self._plugin_manager.send_plugin_message(
-                "tapoautoshutdown",
-                {"type": "nightowl_activated"},
-            )
-        except Exception as exc:
-            self._diag(
-                "warning",
-                "Could not display Night Owl activation notice: %s",
-                exc
-            )
+            # OctoPrint browser notification
+            try:
+                self._plugin_manager.send_plugin_message(
+                    "tapoautoshutdown",
+                    {"type": "nightowl_activated"},
+                )
+            except Exception as exc:
+                self._diag(
+                    "warning",
+                    "Could not display Night Owl activation notice: %s",
+                    exc
+                )
 
-        # ntfy phone notification
-        self._send_ntfy_notification(message)
+            # ntfy phone notification
+            self._send_ntfy_notification(message)
         
 
     def get_settings_defaults(self):
