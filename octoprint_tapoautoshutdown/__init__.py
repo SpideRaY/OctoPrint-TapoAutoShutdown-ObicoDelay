@@ -1365,8 +1365,8 @@ class TapoAutoShutdownPlugin(
         if bed_preheat_now_enabled and not bed_preheat_was_enabled:
 
             message = (
-                "🔥 Automatic Bed Preheat activated – printer bed will"
-                "automatically preheat to 50°C when the printer connects"
+                "🔥 Automatic Bed Preheat activated – printer bed will "
+                "automatically preheat to 50°C when the printer connects "
                 "and is ready."
             )
 
