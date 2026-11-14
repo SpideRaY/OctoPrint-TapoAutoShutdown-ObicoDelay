@@ -675,22 +675,31 @@ class TapoAutoShutdownPlugin(
         ).start()
 
     def _nightowl_shutdown_sequence(self):
-        switched_off = asyncio.run(
-            self._switch_off_ender_tapo(notify=False)
-        )
+        try:
+            switched_off = asyncio.run(
+                self._switch_off_ender_tapo(notify=False)
+            )
 
-        if switched_off:
-            self._ender_plug_off = True
-            self._diag("info",
-                "Night Owl successfully switched off printer Tapo plug"
-            )
-            self._maybe_start_octopi_shutdown()
-        else:
+            if switched_off:
+                self._ender_plug_off = True
+                self._diag("info",
+                    "Night Owl successfully switched off printer Tapo plug"
+                )
+                self._maybe_start_octopi_shutdown()
+            else:
+                self._diag("error",
+                    "Night Owl could not switch off printer Tapo plug"
+                )
+
+        except Exception as e:
             self._diag("error",
-                "Night Owl could not switch off printer Tapo plug"
+                "Night Owl shutdown failed: %s", e
             )
-            with self._nightowl_shutdown_lock:
-                self._nightowl_shutdown_started = False
+
+        finally:
+            if not self._ender_plug_off:
+                with self._nightowl_shutdown_lock:
+                    self._nightowl_shutdown_started = False
 
     
     def _maybe_start_octopi_shutdown(self):
