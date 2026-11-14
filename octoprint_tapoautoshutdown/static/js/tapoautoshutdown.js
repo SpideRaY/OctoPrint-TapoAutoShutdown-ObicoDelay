@@ -31,6 +31,29 @@ function TapoAutoShutdownViewModel(parameters) {
             return;
         }
 
+
+        // AUTO BED PREHEAT ACTIVATED
+        if (data.type === "bed_preheat_activated") {
+
+            new PNotify({
+                title: "Tapo Auto Shutdown - Bed Preheat",
+
+                text: "🦉 Bed Preheat mode activated – printer will " +
+                      "When the printer Tapo plug is turned ON and Octoprint is connected" +
+                      "the printer will automatically heat the bed to 50°C " +
+                      "This will save printing time as you select your GCODE file.",
+
+                type: "notice",
+                hide: true,
+               delay: 10000,
+
+               modules: {
+                    Animate: { animate: false },
+                    Mobile: { swipeDismiss: false }
+               }
+            });
+        }
+
         // NIGHT OWL MODE ACTIVATED
         if (data.type === "nightowl_activated") {
 
