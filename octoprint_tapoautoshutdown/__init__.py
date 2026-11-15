@@ -42,6 +42,8 @@ class TapoAutoShutdownPlugin(
         self._timelapse_failed = False
         self._ender_plug_off = False
         self._octopi_shutdown_started = False
+        self._nightowl_shutdown_started = False
+        self._nightowl_shutdown_lock = threading.Lock()
         self._auto_connect_handled = False
         self._auto_connect_lock = threading.Lock()
         self._bed_preheat_handled = False
@@ -389,6 +391,7 @@ class TapoAutoShutdownPlugin(
             self._timelapse_done = False
             self._timelapse_failed = False
             self._ender_plug_off = False
+            self._nightowl_shutdown_started = False
             self._octopi_shutdown_started = False
             with self._bed_cooling_monitor_lock:
                 self._bed_cooling_monitor_generation += 1
@@ -403,6 +406,9 @@ class TapoAutoShutdownPlugin(
             self._diag("info", 
                 "Timelapse rendering completed successfully"
             )
+            if self._settings.get(["nightowl_shutdown_enabled"]):
+                self._maybe_start_nightowl_shutdown()
+            
             self._maybe_start_octopi_shutdown()
 
         # Record failed timelapse rendering
@@ -417,20 +423,27 @@ class TapoAutoShutdownPlugin(
             self._cancel_obico_timer()
             self._disable_obico_monitoring()
 
-            # Start bed-temperature monitoring for printer shutdown.
-            username = (self._settings.get(["username"]) or "").strip()
-            password = self._settings.get(["password"])
-            ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
-
-            if username and password and ip:
-                self._diag("info", 
-                    "Print completed - starting bed-cooling monitor"
+            # Night Owl bypasses daytime bed-cooling monitoring.
+            if self._settings.get(["nightowl_shutdown_enabled"]):
+                self._diag("info",
+                    "Night Owl enabled - skipping bed-cooling monitor"
                 )
-                self._start_bed_cooling_monitor()
+                self._maybe_start_nightowl_shutdown()
             else:
-                self._diag("warning", 
-                    "Bed-cooling monitor not started: Tapo credentials or IP missing"
-                )
+                # Preserve normal daytime bed-cooling behaviour.
+                username = (self._settings.get(["username"]) or "").strip()
+                password = self._settings.get(["password"])
+                ip = (self._settings.get(["printer_tapo_ip"]) or "").strip()
+
+                if username and password and ip:
+                    self._diag("info",
+                        "Print completed - starting bed-cooling monitor"
+                    )
+                    self._start_bed_cooling_monitor()
+                else:
+                    self._diag("warning",
+                        "Bed-cooling monitor not started: Tapo credentials or IP missing"
+                    )
 
             # Check whether OctoPi shutdown should proceed
             if self._settings.get(["octopi_shutdown_enabled"]):
@@ -511,7 +524,7 @@ class TapoAutoShutdownPlugin(
             self._printer.set_temperature("bed", temperature)
 
             self._send_ntfy_notification(
-                f" 🔥 Ender 3 Pro - Bed preheating set to {temperature:.0f}°C"
+                f" 🔥 Printer - Bed preheating set to {temperature:.0f}°C"
             )
             self._diag("info", 
                 "Automatic bed preheat requested: %.1f C",
@@ -587,7 +600,7 @@ class TapoAutoShutdownPlugin(
                             )
 
                             self._send_ntfy_notification(
-                                f"✅ Ender 3 Pro - Bed preheated to {actual:.1f}°C."
+                                f"✅ Printer - Bed preheated to {actual:.1f}°C."
                             )
                             self._diag(
                                 "info",
@@ -626,9 +639,68 @@ class TapoAutoShutdownPlugin(
                 ),
             },
         )
-            
 
-    
+    def _maybe_start_nightowl_shutdown(self):
+        if not self._settings.get(["nightowl_shutdown_enabled"]):
+            return
+
+        with self._nightowl_shutdown_lock:
+            if self._nightowl_shutdown_started or self._ender_plug_off:
+                return
+
+            if not self._successful_print:
+                return
+
+            if self._timelapse_failed:
+                self._diag("error",
+                    "Night Owl shutdown cancelled because timelapse rendering failed"
+                )
+                return
+
+            if not self._timelapse_done:
+                self._diag("info",
+                    "Night Owl waiting for timelapse rendering to finish"
+                )
+                return
+
+            self._nightowl_shutdown_started = True
+
+        self._diag("info",
+            "Night Owl: print and timelapse successful - switching off printer"
+        )
+
+        threading.Thread(
+            target=self._nightowl_shutdown_sequence,
+            daemon=True,
+        ).start()
+
+    def _nightowl_shutdown_sequence(self):
+        try:
+            switched_off = asyncio.run(
+                self._switch_off_ender_tapo(notify=False)
+            )
+
+            if switched_off:
+                self._ender_plug_off = True
+                self._diag("info",
+                    "Night Owl successfully switched off printer Tapo plug"
+                )
+                self._maybe_start_octopi_shutdown()
+            else:
+                self._diag("error",
+                    "Night Owl could not switch off printer Tapo plug"
+                )
+
+        except Exception as e:
+            self._diag("error",
+                "Night Owl shutdown failed: %s", e
+            )
+
+        finally:
+            if not self._ender_plug_off:
+                with self._nightowl_shutdown_lock:
+                    self._nightowl_shutdown_started = False
+
     
     def _maybe_start_octopi_shutdown(self):
         if self._octopi_shutdown_started:
@@ -1041,7 +1113,7 @@ class TapoAutoShutdownPlugin(
                                 actual,
                             )
                             self._send_ntfy_notification(
-                                f" ❄️ Ender 3 Pro bed is at {actual:.1f}°C or below — you may be able to remove your print."
+                                f" ❄️ Printer bed is at {actual:.1f}°C or below — you may be able to remove your print."
                             )
 
                     if actual <= 32.0:
@@ -1072,7 +1144,7 @@ class TapoAutoShutdownPlugin(
                                 actual,
                             )
                             self._send_ntfy_notification(
-                                f"⚠️ Ender 3 Pro bed is at {actual:.1f}°C — the printer's Tapo plug will switch off automatically at 30°C."
+                                f"⚠️ Printer bed is at {actual:.1f}°C — the printer's Tapo plug will switch off automatically at 30°C."
                             )
 
             except Exception as e:
@@ -1084,7 +1156,7 @@ class TapoAutoShutdownPlugin(
 
             time.sleep(10)
 
-    async def _switch_off_ender_tapo(self):
+    async def _switch_off_ender_tapo(self, notify=True):
         """Switch off the Ender plug directly; do not arm a fixed timer."""
         username = (self._settings.get(["username"]) or "").strip()
         password = self._settings.get(["password"])
@@ -1100,12 +1172,13 @@ class TapoAutoShutdownPlugin(
             client = ApiClient(username, password)
             plug = await client.p110(ip)
             await plug.off()
-            self._send_ntfy_notification(
-                " 🔌Ender 3 Pro Tapo plug switched off after bed cooling."
-            )
+            if notify:
+                self._send_ntfy_notification(
+                    " 🔌Printer Tapo plug switched off after bed cooling."
+                )
             return True
         except Exception as e:
-            self._diag("error", "Failed to switch off Ender Tapo plug: %s", e)
+            self._diag("error", "Failed to switch off Printer Tapo plug: %s", e)
             return False
 
     # Run the OctoPi shutdown sequence in the background
@@ -1238,6 +1311,15 @@ class TapoAutoShutdownPlugin(
         # Start with all existing settings, including defaults.
         existing = self._settings.get_all_data(merged=True) or {}
         merged_data = dict(existing)
+        bed_preheat_was_enabled = bool(
+            existing.get("bed_preheat_enabled", False)
+        )
+        nightowl_was_enabled = bool(
+            existing.get("nightowl_shutdown_enabled", False)
+        )
+        octopi_was_enabled = bool(
+            existing.get("octopi_shutdown_enabled", False)
+        )
 
         # Apply only values actually submitted by the settings page.
         merged_data.update(data or {})
@@ -1275,9 +1357,112 @@ class TapoAutoShutdownPlugin(
         octoprint.plugin.SettingsPlugin.on_settings_save(
             self, merged_data
        )
+        # Notify when Bed Preheat changes from OFF to ON.
+        bed_preheat_now_enabled = bool(
+            merged_data.get("bed_preheat_enabled", False)
+       )
 
+        if bed_preheat_now_enabled and not bed_preheat_was_enabled:
+
+            message = (
+                "🔥 Automatic Bed Preheat activated – printer bed will "
+                "automatically preheat to 50°C when the printer connects "
+                "and is ready."
+            )
+
+            self._diag(
+                "info",
+                "Bed Preheat  mode activated in plugin settings"
+            )
+
+            # OctoPrint browser notification
+            try:
+                self._plugin_manager.send_plugin_message(
+                    "tapoautoshutdown",
+                    {"type": "bed_preheat_activated"},
+                )
+            except Exception as exc:
+                self._diag(
+                    "warning",
+                    "Could not display Bed Preheat activation notice: %s",
+                    exc
+                )
+
+            # ntfy phone notification
+            self._send_ntfy_notification(message)
+
+        
+        # Notify when Night Owl changes from OFF to ON.
+        nightowl_now_enabled = bool(
+            merged_data.get("nightowl_shutdown_enabled", False)
+       )
+
+        if nightowl_now_enabled and not nightowl_was_enabled:
+
+            message = (
+                "🦉 Night Owl mode activated – printer will switch off "
+                "automatically after a successful print and timelapse."
+            )
+
+            self._diag(
+                "info",
+                "Night Owl mode activated in plugin settings"
+            )
+
+            # OctoPrint browser notification
+            try:
+                self._plugin_manager.send_plugin_message(
+                    "tapoautoshutdown",
+                    {"type": "nightowl_activated"},
+                )
+            except Exception as exc:
+                self._diag(
+                    "warning",
+                    "Could not display Night Owl activation notice: %s",
+                    exc
+                )
+
+            # ntfy phone notification
+            self._send_ntfy_notification(message)
+                
+        # Notify when OctoPi Automatic Shutdown changes from OFF to ON.
+        octopi_now_enabled = bool(
+            merged_data.get("octopi_shutdown_enabled", False)
+        )
+
+        if octopi_now_enabled and not octopi_was_enabled:
+
+            message = (
+                "🐙 Automatic OctoPi shutdown activated – "
+                "OctoPi will shut down cleanly after a successful "
+                "print and timelapse, once the printer Tapo plug is off."
+            )
+
+            self._diag(
+                "info",
+                "Automatic OctoPi shutdown activated in plugin settings"
+            )
+
+            # OctoPrint browser notification
+            try:
+                self._plugin_manager.send_plugin_message(
+                    "tapoautoshutdown",
+                    {"type": "octopi_shutdown_activated"},
+                )
+            except Exception as exc:
+                self._diag(
+                    "warning",
+                    "Could not display OctoPi shutdown activation notice: %s",
+                    exc
+                )
+
+            # ntfy phone notification
+            self._send_ntfy_notification(message)     
+
+    
     def get_settings_defaults(self):
         return {
+            
             # Tapo Account
             "username": "",
             "password": "",
@@ -1288,6 +1473,9 @@ class TapoAutoShutdownPlugin(
 
             # Bed Preheat 
             "bed_preheat_enabled": False,
+
+            # Night Owl Shutdown
+            "nightowl_shutdown_enabled": False,
 
             # OctoPi Tapo P110
             "octopi_tapo_ip": "",

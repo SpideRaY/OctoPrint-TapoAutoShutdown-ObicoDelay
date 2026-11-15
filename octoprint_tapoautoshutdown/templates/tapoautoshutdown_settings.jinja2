@@ -21,37 +21,43 @@
     </div>
 </div>
 
-<div class="control-group">
-    <label class="control-label">OctoPi Tapo P110 IP address</label>
-    <div class="controls">
-        <span class="ip-prefix">192.168.1.</span>
-        <input type="number" class="input-mini" min="1" max="254" step="1" inputmode="numeric"
-            placeholder="1–254"
-            aria-label="OctoPi Tapo IP final octet"
-            data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_ip_last_octet">
-        <p class="help-block">Enter a number from 1 to 254.</p>
+<div class="row-fluid">
+    <div class="span6">
+        <div class="control-group">
+            <label class="control-label">OctoPi Tapo P110 IP address</label>
+                <div class="controls">
+                <span class="ip-prefix">192.168.1.</span>
+                <input type="number" class="input-mini" min="1" max="254" step="1" inputmode="numeric"
+                    placeholder="1–254"
+                    aria-label="OctoPi Tapo IP final octet"
+                    data-bind="value: settings.plugins.tapoautoshutdown.octopi_tapo_ip_last_octet">
+                <p class="help-block">Enter a number from 1 to 254.</p>
+                </div>
+        </div>
+    </div>
+
+    <div class="span6">
+        <div class="control-group">
+            <label class="control-label">Printer Tapo P110 IP address</label>
+                <div class="controls">
+                <span class="ip-prefix">192.168.1.</span>
+                <input type="number" class="input-mini" min="1" max="254" step="1" inputmode="numeric"
+                    placeholder="1–254"
+                    aria-label="Printer Tapo IP final octet"
+                    data-bind="value: settings.plugins.tapoautoshutdown.printer_tapo_ip_last_octet">
+                <p class="help-block">Enter a number from 1 to 254.</p>
+                </div>
+        </div>
     </div>
 </div>
 
 <div class="control-group">
-    <label class="control-label">Printer Tapo P110 IP address</label>
-    <div class="controls">
-        <span class="ip-prefix">192.168.1.</span>
-        <input type="number" class="input-mini" min="1" max="254" step="1" inputmode="numeric"
-            placeholder="1–254"
-            aria-label="Printer Tapo IP final octet"
-            data-bind="value: settings.plugins.tapoautoshutdown.printer_tapo_ip_last_octet">
-        <p class="help-block">Enter a number from 1 to 254.</p>
-    </div>
-</div>
-
-<div class="control-group">
-    <label class="control-label">Automatic bed preheat</label>
+    <label class="control-label">Automatic Printer Bed Preheat</label>
     <div class="controls">
         <label class="checkbox">
             <input type="checkbox"
                    data-bind="checked: settings.plugins.tapoautoshutdown.bed_preheat_enabled">
-            Enable automatic bed preheat
+            🔥 Enable automatic printer bed preheat
         </label>
         <p class="help-block">
             Automatically heat the bed to a fixed target of 50°C after
@@ -60,15 +66,27 @@
     </div>
 </div>
 
-
+<div class="control-group">
+    <label class="control-label">Night Owl Printer Automatic Shutdown</label>
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox"
+                data-bind="checked: settings.plugins.tapoautoshutdown.nightowl_shutdown_enabled">
+            🦉 Enable Night Owl printer automatic shutdown
+        </label>
+        <p class="help-block">
+            When enabled, the Printer Tapo will shutdown after the print has finished this bypasses the daytime bed cooling to 30°C shutdown and the ntfy alerts this will save an extra 15 mins power.
+        </p>
+    </div>
+</div>
 
 <div class="control-group">
-    <label class="control-label">OctoPi automatic shutdown</label>
+    <label class="control-label">OctoPi Automatic Shutdown</label>
     <div class="controls">
         <label class="checkbox">
             <input type="checkbox"
                 data-bind="checked: settings.plugins.tapoautoshutdown.octopi_shutdown_enabled">
-            Enable automatic OctoPi shutdown
+            🐙 Enable automatic OctoPi shutdown
         </label>
         <p class="help-block">
             When enabled, the OctoPi Tapo shutdown timer starts when the Ender Tapo plug has switched off after the bed cools to 30°C. OctoPrint is then asked to shut down cleanly. If a shutdown failure is detected it will attempt to cancel the timer.
@@ -77,7 +95,7 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label">OctoPi shutdown delay (minutes)</label>
+    <label class="control-label">Raspberry Pi shutdown delay (minutes)</label>
     <div class="controls">
         <input type="number"
             class="input-medium"
@@ -86,11 +104,10 @@
             step="1"
             data-bind="value: settings.plugins.tapoautoshutdown.octopi_shutdown_delay">
        <p class="help-block">
-            Time to allow the Raspberry Pi to complete its shutdown before the OctoPi Tapo P110 switches off. Recommended: 5 minutes. Allowed range: 1–60 minutes.
+            Time to allow the Raspberry Pi to complete its shutdown before the OctoPi Tapo P110 switches off.
         </p> 
     </div>
 </div>
-
 
 <div class="control-group">
     <label class="control-label">Obico AI delay (minutes)</label>
@@ -100,8 +117,12 @@
             min="0"
             data-bind="value: settings.plugins.tapoautoshutdown.obico_monitor_delay">
         <p class="help-block">
-            Time to wait after a print starts before enabling Obico AI failure detection.
-            Set to 0 to enable AI immediately.
+            Delay for Obico AI failure detection. Default is 30 mins allows printer to heat up and a manual check of the first layer adhesion. Set to zero for immediate monitoring. 
+            <a href="https://www.obico.io/"
+                target="_blank"
+                rel="noopener noreferrer">
+                Visit obico.io to download their app.
+            </a>
         </p>
     </div>
 </div>
@@ -114,10 +135,12 @@
             data-bind="value: settings.plugins.tapoautoshutdown.ntfy_topic"
             placeholder="Enter your ntfy topic">
         <p class="help-block">
-            Topic used for phone push notifications at ntfy.sh. Use a hard-to-guess topic name and keep it private. Leave empty to disable ntfy notifications.
+            Notifications are delivered using ntfy. Use a hard-to-guess topic name and keep it private. Leave empty to disable ntfy notifications.
+            <a href="https://ntfy.sh"
+                target="_blank"
+                rel="noopener noreferrer">
+                Visit ntfy.sh to download their app.
+            </a>
         </p>
     </div>
 </div>
-
-
-

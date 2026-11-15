@@ -1,4 +1,4 @@
-# **OctoPrint-TapoAutoShutdown v0.3.2.4**
+# **OctoPrint-TapoAutoShutdown v0.3.2.5**
 
 ## Version differences
 
@@ -82,6 +82,14 @@ Retains the existing printer shutdown, optional OctoPi shutdown, and Obico AI mo
 * Send an urgent ntfy notification when the shutdown is triggered.
 * If the temperature drops below 70°C before the second reading, the consecutive-reading counter resets.
 
+**v0.3.2.5 — Added Night Owl function to save power on longer over night prints**
+
+* Added optional Night Owl automatic printer shutdown for overnight prints.
+* Night Owl waits for successful print and timelapse completion then shuts down the printer tapo.
+* Skips daytime bed-cooling monitoring and notifications. Preserves OctoApp, Obico and emergency notifications.
+* Renamed OctoPi shutdown delay to Raspberry Pi shutdown delay, Night Owl and Raspberry Pi shutdown disabled by default.
+* Documented Obico's 30-minute default whilst the first layers are manually checked, zero enables immediate monitoring when print starts.
+* Added clickable hyperlinks to both ntfy and Obico websites, for more information and their mobile apps.
 
 **Upgrading to the latest version**
 
